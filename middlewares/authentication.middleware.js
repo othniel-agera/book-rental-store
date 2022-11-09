@@ -1,5 +1,5 @@
 const { verify } = require('jsonwebtoken');
-const { asyncHandler } = require('../lib/utility.lib');
+const asyncHandler = require('./async.middleware');
 const ErrorResponse = require('../lib/errorResponse');
 const User = require('../models/user.model');
 

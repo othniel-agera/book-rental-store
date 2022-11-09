@@ -1,9 +1,10 @@
 const ErrorResponse = require('../lib/errorResponse');
 
-const errorHandler = (err, req, res, next) => {
+// eslint-disable-next-line no-unused-vars
+const errorHandler = (err, req, res, _next) => {
+  res.header('Content-Type', 'application/json');
   let error = { ...err };
   error.message = err.message;
-
   console.log(`${err}`.red);
 
   // Mongoose bad ObjectId
@@ -23,7 +24,6 @@ const errorHandler = (err, req, res, next) => {
     const message = Object.values(err.errors).map((val) => val.message);
     error = new Error(message, 400);
   }
-  console.log(err);
   res.status(error.statusCode || 500).json({
     success: false,
     error: error.message || 'Server Error',

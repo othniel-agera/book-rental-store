@@ -1,7 +1,7 @@
 const utility = require('../lib/utility.lib');
-const { fetchUser, createUser, destroyUser } = require('../lib/user.lib');
+const UserLib = require('../lib/user.lib');
 const User = require('../models/user.model');
-const asyncHandler = require('../middlewares/async');
+const asyncHandler = require('../middlewares/async.middleware');
 const ErrorResponse = require('../lib/errorResponse');
 
 const {
@@ -9,46 +9,44 @@ const {
 } = utility;
 
 class AuthController {
+  constructor() {
+    this.userLib = new UserLib();
+  }
+
   /**
    * @desc Register user
-   * @route POST /api/v1/auth/register
+   * @route POST /api/v1/auth/signup
    * @access Public
    */
-  register = asyncHandler(async (req, res, next) => {
-    let user;
-    try {
-      const rawData = req.body;
-      const { password } = rawData;
-      const encryptedPassword = await hashPassword(password);
-      const filteredValues = filterValues(rawData, ['email', 'username', 'password', 'firstname', 'lastname']);
-      const formattedValues = formatValues(filteredValues);
-      const data = {
-        ...formattedValues,
-        password: encryptedPassword,
-      };
-      const existingEmail = await fetchUser({
-        email: data.email,
-      });
-      if (existingEmail) {
-        return next(
-          new ErrorResponse('Email already taken', 400),
-        );
-      }
-      const existingUsername = await fetchUser({
-        username: data.username,
-      });
-      if (existingUsername) {
-        return next(
-          new ErrorResponse('Username already taken', 400),
-        );
-      }
-
-      user = await createUser(data);
-      return sendTokenResponse(user, 200, res);
-    } catch (error) {
-      if (user && user.id) await destroyUser({ id: user.id });
-      return new ErrorResponse({ error: error.message || error });
+  signup = asyncHandler(async (req, res, next) => {
+    const rawData = req.body;
+    const { password } = rawData;
+    const encryptedPassword = await hashPassword(password);
+    const filteredValues = filterValues(rawData, ['email', 'username', 'password', 'firstname', 'lastname']);
+    const formattedValues = formatValues(filteredValues);
+    const data = {
+      ...formattedValues,
+      password: encryptedPassword,
+    };
+    const existingEmail = await this.userLib.fetchUser({
+      email: data.email,
+    });
+    if (existingEmail) {
+      return next(
+        new ErrorResponse('Email already taken', 400),
+      );
     }
+    const existingUsername = await this.userLib.fetchUser({
+      username: data.username,
+    });
+    if (existingUsername) {
+      return next(
+        new ErrorResponse('Username already taken', 400),
+      );
+    }
+
+    const user = await this.userLib.createUser(data, next);
+    return sendTokenResponse(user, 200, res);
   });
 
   /**
@@ -71,7 +69,7 @@ class AuthController {
           new ErrorResponse('Please provide an email and password', 400),
         );
       }
-      const user = await fetchUser({
+      const user = await this.userLib.fetchUser({
         email: data.email,
       });
       if (!user) {
@@ -95,7 +93,7 @@ class AuthController {
    * @access Private
    */
   getMe = asyncHandler(async (req, res) => {
-    const user = await fetchUser(req.user.id);
+    const user = await this.userLib.fetchUser(req.user.id);
 
     res.status(200).json({ success: true, data: user });
   });

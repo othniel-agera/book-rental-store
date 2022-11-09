@@ -35,7 +35,7 @@ const ReviewSchema = new Schema(
 );
 
 // eslint-disable-next-line func-names
-ReviewSchema.virtual('likes').get(function () {
+ReviewSchema.virtual('numberOfLikes').get(function () {
   return this.likes.length;
 });
 
