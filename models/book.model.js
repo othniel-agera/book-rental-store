@@ -19,25 +19,40 @@ const BookSchema = new Schema(
     authorInformation: {
       type: Schema.Types.ObjectId,
       ref: 'user',
+      required: true,
     },
     dimension: {
       height: {
-        type: String,
+        type: Number,
         required: true,
       },
       width: {
+        type: Number,
+        required: true,
+      },
+      unitOfMeasurement: {
         type: String,
         required: true,
       },
     },
     pricing: {
-      dailyRental: {
+      dailyRate: {
         type: Number,
         default: 0,
       },
       currency: {
         type: String,
         required: true,
+      },
+    },
+    quantity: {
+      inStock: {
+        type: Number,
+        default: 1,
+      },
+      rentedOut: {
+        type: Number,
+        default: 0,
       },
     },
   },
