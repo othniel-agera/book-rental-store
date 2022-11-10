@@ -1,6 +1,6 @@
 const { verify } = require('jsonwebtoken');
 const asyncHandler = require('./async.middleware');
-const ErrorResponse = require('../lib/errorResponse');
+const ErrorResponse = require('../utils/errorResponse.util');
 const User = require('../models/user.model');
 
 class Authentication {

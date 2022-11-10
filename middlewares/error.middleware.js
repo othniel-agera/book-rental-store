@@ -1,11 +1,10 @@
-const ErrorResponse = require('../lib/errorResponse');
+const ErrorResponse = require('../utils/errorResponse.util');
 
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, _next) => {
   res.header('Content-Type', 'application/json');
   let error = { ...err };
   error.message = err.message;
-  console.log(`${err}`.red);
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
@@ -22,8 +21,14 @@ const errorHandler = (err, req, res, _next) => {
   // Mongoose validation error
   if (err.name === 'ValidationError') {
     const message = Object.values(err.errors).map((val) => val.message);
-    error = new Error(message, 400);
+    error = new ErrorResponse(message, 400);
   }
+
+  // celebrate validation error
+  if (error?.details?.get('body')?.stack?.includes('ValidationError')) {
+    error = new ErrorResponse(error.details.get('body').stack, 422);
+  }
+
   res.status(error.statusCode || 500).json({
     success: false,
     error: error.message || 'Server Error',

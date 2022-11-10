@@ -1,8 +1,8 @@
-const utility = require('../lib/utility.lib');
+const utility = require('../utils/utility.util');
 const UserLib = require('../lib/user.lib');
 const User = require('../models/user.model');
 const asyncHandler = require('../middlewares/async.middleware');
-const ErrorResponse = require('../lib/errorResponse');
+const ErrorResponse = require('../utils/errorResponse.util');
 
 const {
   filterValues, formatValues, hashPassword, comparePasswords, sendTokenResponse,
