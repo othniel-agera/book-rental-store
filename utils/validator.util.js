@@ -27,5 +27,13 @@ class Validator {
         }),
     }),
   });
+
+  static updateDetailsValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      username: Joi.string(),
+      firstname: Joi.string(),
+      lastname: Joi.string(),
+    }),
+  });
 }
 module.exports = Validator;

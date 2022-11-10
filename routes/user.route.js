@@ -10,6 +10,6 @@ const router = Router();
 router.post('/signup', Validator.signupValidator, signup);
 router.post('/login', Validator.loginValidator, login);
 router.get('/me', authenticate, getMe);
-router.put('/updatedetails', authenticate, updateDetails);
+router.put('/updatedetails', authenticate, Validator.updateDetailsValidator, updateDetails);
 
 module.exports = router;

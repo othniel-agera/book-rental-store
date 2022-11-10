@@ -1,4 +1,6 @@
-const { app, expect, request } = require('./common.spec');
+const {
+  app, expect, request, putRequest, getRequest,
+} = require('./common.spec');
 const UserLib = require('../lib/user.lib');
 const { hashPassword } = require('../utils/utility.util');
 
@@ -6,6 +8,24 @@ const { createUser, fetchUser, destroyUser } = new UserLib();
 
 describe('User Registration Test', () => {
   describe('Positive Tests', () => {
+    let token;
+    let userToDelete;
+    const user = {
+      username: `${Date.now()}_kufre`,
+      firstname: `${Date.now()}_Kufre`,
+      lastname: `${Date.now()}_Okon`,
+      email: `${Date.now()}_example@example.com`,
+      password: 'Test1234',
+    };
+    before(async () => {
+      const password = await hashPassword(user.password);
+      await createUser({ ...user, password });
+      const response = await request(app)
+        .post('/api/v1/auth/login')
+        .send({ email: user.email, password: user.password })
+        .set('Accept', 'application/json');
+      token = response.body.accessToken;
+    });
     it('should register user successfully', async () => {
       const response = await request(app)
         .post('/api/v1/auth/signup')
@@ -55,6 +75,39 @@ describe('User Registration Test', () => {
       expect(resp_data.accessToken).to.not.equal('');
       expect(resp_data.refreshToken).to.be.an('string');
       expect(resp_data.refreshToken).to.not.equal('');
+    });
+    it('should update loggedin user successfully', async () => {
+      const response = await putRequest('/auth/updatedetails', token)
+        .send({
+          username: `${Date.now()}_ox`,
+          firstname: 'leo',
+          lastname: 'lenzo',
+        })
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.data).to.be.an('object');
+      expect(resp_data.success).to.equal(true);
+    });
+    it('should be able to get loggedin user details successfully', async () => {
+      const response = await getRequest('/auth/me', token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.data).to.be.an('object');
+      expect(resp_data.success).to.equal(true);
+    });
+    after(async () => {
+      userToDelete = await fetchUser({ username: user.username });
+      if (userToDelete) { await destroyUser(userToDelete.id, true); }
     });
   });
 

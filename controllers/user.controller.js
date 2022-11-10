@@ -1,6 +1,5 @@
 const utility = require('../utils/utility.util');
 const UserLib = require('../lib/user.lib');
-const User = require('../models/user.model');
 const asyncHandler = require('../middlewares/async.middleware');
 const ErrorResponse = require('../utils/errorResponse.util');
 
@@ -106,14 +105,11 @@ class AuthController {
    * @access Private
    */
   updateDetails = asyncHandler(async (req, res) => {
-    const fieldToUpdate = {
-      name: req.body.name,
-      email: req.body.email,
-    };
-    const user = await User.findByIdAndUpdate(req.user.id, fieldToUpdate, {
-      new: true,
-      runValidators: true,
-    });
+    const rawData = req.body;
+    const filteredValues = filterValues(rawData, ['username', 'firstname', 'lastname']);
+    const formattedValues = formatValues(filteredValues);
+
+    const user = await this.userLib.updateUser(req.user.id, formattedValues);
 
     res.status(200).json({ success: true, data: user });
   });
