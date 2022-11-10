@@ -1,6 +1,8 @@
 const { app, expect, request } = require('./common.spec');
-const { createUser, fetchUser, destroyUser } = require('../lib/user.lib');
-const { hashPassword } = require('../lib/utility.lib');
+const UserLib = require('../lib/user.lib');
+const { hashPassword } = require('../utils/utility.util');
+
+const { createUser, fetchUser, destroyUser } = new UserLib();
 
 describe('User Registration Test', () => {
   describe('Positive Tests', () => {
@@ -12,7 +14,7 @@ describe('User Registration Test', () => {
           firstname: 'leo',
           lastname: 'lenzo',
           email: `${Date.now()}_kufre@example.com`,
-          password: 'test123',
+          password: 'Test1234',
         })
         .set('Accept', 'application/json')
         .expect(201);
@@ -27,27 +29,24 @@ describe('User Registration Test', () => {
       expect(resp_data.refreshToken).to.not.equal('');
     });
     it('should login user successfully', async () => {
-      const email = `${Date.now()}_example@example.com`;
+      const emailPassword = { email: `${Date.now()}_example@example.com`, password: 'Test1234' };
       await request(app)
         .post('/api/v1/auth/signup')
         .send({
           username: `${Date.now()}_ox`,
           firstname: 'leo',
           lastname: 'lenzo',
-          email,
-          password: 'test123',
+          ...emailPassword,
         })
         .set('Accept', 'application/json')
         .expect(201);
       const response = await request(app)
         .post('/api/v1/auth/login')
         .send({
-          email,
-          password: 'test123',
+          ...emailPassword,
         })
         .set('Accept', 'application/json')
         .expect(200);
-
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
       expect(resp_data).to.have.property('accessToken');
@@ -61,65 +60,80 @@ describe('User Registration Test', () => {
 
   describe('Negative Tests', () => {
     const user = {
-      username: 'kufre',
+      username: `${Date.now()}_ox`,
       firstname: 'Kufre',
       lastname: 'Okon',
-      email: 'kufre@example.com',
-      password: 'test123',
+      email: `${Date.now()}_example@example.com`,
+      password: 'Test1234',
     };
     before(async () => {
-      const password = await hashPassword('test123');
+      const password = await hashPassword('Test1234');
       await createUser({ ...user, password });
     });
-    it('should not register user successfully when an email is reuse', async () => {
+    it('should not register user successfully when an email is already in use', async () => {
       const response = await request(app)
         .post('/api/v1/auth/signup')
         .send(user)
         .set('Accept', 'application/json')
-        .expect(200);
+        .expect(400);
 
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
-      expect(resp_data).to.have.property('Error');
-      expect(resp_data.Error).to.be.an('string');
-      expect(resp_data.Error).to.equal('Email already taken');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      expect(resp_data.error).to.equal('Email already taken');
     });
-    it('should not register user successfully when an username is reuse', async () => {
+    it('should not register user successfully when an username is already in use', async () => {
       const response = await request(app)
         .post('/api/v1/auth/signup')
         .send({ ...user, email: 'kufre@email.com' })
         .set('Accept', 'application/json')
-        .expect(200);
+        .expect(400);
 
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
-      expect(resp_data).to.have.property('Error');
-      expect(resp_data.Error).to.be.an('string');
-      expect(resp_data.Error).to.equal('Username already taken');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      expect(resp_data.error).to.equal('Username already taken');
     });
     it('should not login user successfully because of incorrect email', async () => {
-      const password = await hashPassword('test123');
+      const password = await hashPassword('Test1234');
       const response = await request(app)
         .post('/api/v1/auth/login')
-        .send({ ...user, password })
+        .send({ email: 'tgegge@yghben.com', password })
         .set('Accept', 'application/json')
         .expect(401);
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
-      expect(resp_data).to.have.property('message');
-      expect(resp_data.message).to.equal('Incorrect email or password');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      expect(resp_data.error).to.equal('Incorrect email or password');
     });
     it('should not login user successfully because of incorrect password', async () => {
       const response = await request(app)
         .post('/api/v1/auth/login')
-        .send({ ...user, password: 'kufre@email.com' })
+        .send({ email: user.email, password: 'Kufre1email.com' })
         .set('Accept', 'application/json')
         .expect(401);
 
       const resp_data = response.body;
+      console.log(resp_data);
       expect(resp_data).to.be.an('object');
-      expect(resp_data).to.have.property('message');
-      expect(resp_data.message).to.equal('Incorrect email or password');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      expect(resp_data.error).to.equal('Incorrect email or password');
     });
     after(async () => {
       const userToDelete = await fetchUser({ username: user.username });

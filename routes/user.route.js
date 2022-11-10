@@ -8,7 +8,7 @@ const Validator = require('../utils/validator.util');
 const router = Router();
 
 router.post('/signup', Validator.signupValidator, signup);
-router.post('/login', login);
+router.post('/login', Validator.loginValidator, login);
 router.get('/me', authenticate, getMe);
 router.put('/updatedetails', authenticate, updateDetails);
 

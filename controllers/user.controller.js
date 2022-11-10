@@ -46,7 +46,7 @@ class AuthController {
     }
 
     const user = await this.userLib.createUser(data, next);
-    return sendTokenResponse(user, 200, res);
+    return sendTokenResponse(user, 201, res);
   });
 
   /**
@@ -81,7 +81,9 @@ class AuthController {
       if (passwordMatch) {
         sendTokenResponse(user, 200, res);
       }
-      return res.status(401).send({ message: 'Incorrect email or password' });
+      return next(
+        new ErrorResponse('Incorrect email or password', 401),
+      );
     } catch (error) {
       return res.status(500).send({ error: error.message || error });
     }
