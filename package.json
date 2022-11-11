@@ -1,0 +1,52 @@
+{
+  "name": "book-rental-store",
+  "version": "1.0.0",
+  "description": "Book Rental Store is an e-commerce application where users(authors) can showcase their books for rent.",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "test": "NODE_ENV=test nyc --reporter=lcov mocha --exit",
+    "test:coveralls": "nyc npm test && nyc report --reporter=text-lcov | coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/othniel-agera/book-rental-store.git"
+  },
+  "keywords": [
+    "API",
+    "stackoverflow",
+    "clone"
+  ],
+  "author": "Othniel Agera",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/othniel-agera/book-rental-store/issues"
+  },
+  "homepage": "https://github.com/othniel-agera/book-rental-store#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "celebrate": "^15.0.1",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
+    "mocha": "^10.0.0",
+    "mongoose": "^6.7.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "colors": "^1.4.0",
+    "coveralls": "^3.1.1",
+    "eslint": "^8.23.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "mocha-lcov-reporter": "^1.3.0",
+    "nodemon": "^2.0.19",
+    "nyc": "^15.1.0",
+    "postman-to-markdown": "^1.0.7",
+    "prettier": "^2.7.1",
+    "supertest": "^6.2.4"
+  }
+}
