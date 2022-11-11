@@ -17,7 +17,7 @@ describe('User Registration Test', () => {
       email: `${Date.now()}_example@example.com`,
       password: 'Test1234',
     };
-    before(async () => {
+    before(async (done) => {
       const password = await hashPassword(user.password);
       await createUser({ ...user, password });
       const response = await request(app)
@@ -25,6 +25,7 @@ describe('User Registration Test', () => {
         .send({ email: user.email, password: user.password })
         .set('Accept', 'application/json');
       token = response.body.accessToken;
+      done();
     });
     it('should register user successfully', async () => {
       const response = await request(app)
@@ -105,9 +106,10 @@ describe('User Registration Test', () => {
       expect(resp_data.data).to.be.an('object');
       expect(resp_data.success).to.equal(true);
     });
-    after(async () => {
+    after(async (done) => {
       userToDelete = await fetchUser({ username: user.username });
       if (userToDelete) { await destroyUser(userToDelete.id, true); }
+      done();
     });
   });
 
