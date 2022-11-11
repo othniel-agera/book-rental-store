@@ -18,6 +18,7 @@ describe('User Registration Test', () => {
       password: 'Test1234',
     };
     before(async (done) => {
+      this.timeout(10000);
       const password = await hashPassword(user.password);
       await createUser({ ...user, password });
       const response = await request(app)
@@ -107,6 +108,7 @@ describe('User Registration Test', () => {
       expect(resp_data.success).to.equal(true);
     });
     after(async (done) => {
+      this.timeout(10000);
       userToDelete = await fetchUser({ username: user.username });
       if (userToDelete) { await destroyUser(userToDelete.id, true); }
       done();
