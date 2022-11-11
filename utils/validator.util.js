@@ -1,6 +1,8 @@
 const { celebrate, Joi, Segments } = require('celebrate');
+const { isValidObjectId } = require('./utility.util');
 
 class Validator {
+  // Validators for auth routes
   static signupValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
       username: Joi.string().required().messages({ 'string.empty': 'Username required' }),
@@ -35,5 +37,63 @@ class Validator {
       lastname: Joi.string(),
     }),
   });
+
+  // Validators for book routes
+  static postBookValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      title: Joi.string().required(),
+      description: Joi.string().required(),
+      subject: Joi.string().required(),
+      authorInformation: Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        return value;
+      }, 'ObjectID Validation'),
+      dimension: Joi.object({
+        height: Joi.number().required(),
+        width: Joi.number().required(),
+        unitOfMeasurement: Joi.string().required(),
+      }),
+      pricing: Joi.object({
+        dailyRate: Joi.number().required(),
+        currency: Joi.string().required(),
+      }),
+      quantity: Joi.object({
+        inStock: Joi.number(),
+        rentedOut: Joi.number(),
+      }),
+    }),
+  });
+
+  static putBookValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      title: Joi.string(),
+      description: Joi.string(),
+      subject: Joi.string(),
+      authorInformation: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        return value;
+      }, 'ObjectID Validation'),
+      dimension: Joi.object({
+        height: Joi.number(),
+        width: Joi.number(),
+        unitOfMeasurement: Joi.string(),
+      }),
+      pricing: Joi.object({
+        dailyRate: Joi.number(),
+        currency: Joi.string(),
+      }),
+      quantity: Joi.object({
+        inStock: Joi.number(),
+        rentedOut: Joi.number(),
+      }),
+    }),
+  });
+
+  static putInStockBookValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      inStock: Joi.number(),
+    }),
+  });
 }
+
 module.exports = Validator;
