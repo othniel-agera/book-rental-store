@@ -17,7 +17,8 @@ describe('User Registration Test', () => {
       email: `${Date.now()}_example@example.com`,
       password: 'Test1234',
     };
-    before(async (done) => {
+    // eslint-disable-next-line func-names
+    before(async function () {
       this.timeout(10000);
       const password = await hashPassword(user.password);
       await createUser({ ...user, password });
@@ -26,7 +27,6 @@ describe('User Registration Test', () => {
         .send({ email: user.email, password: user.password })
         .set('Accept', 'application/json');
       token = response.body.accessToken;
-      done();
     });
     it('should register user successfully', async () => {
       const response = await request(app)
@@ -107,11 +107,11 @@ describe('User Registration Test', () => {
       expect(resp_data.data).to.be.an('object');
       expect(resp_data.success).to.equal(true);
     });
-    after(async (done) => {
+    // eslint-disable-next-line func-names
+    after(async function () {
       this.timeout(10000);
       userToDelete = await fetchUser({ username: user.username });
       if (userToDelete) { await destroyUser(userToDelete.id, true); }
-      done();
     });
   });
 
@@ -120,7 +120,7 @@ describe('User Registration Test', () => {
       username: `${Date.now()}_ox`,
       firstname: 'Kufre',
       lastname: 'Okon',
-      email: `${Date.now()}_example@example.com`,
+      email: `${Date.now()}_negative.example@example.com`,
       password: 'Test1234',
     };
     before(async () => {
@@ -194,7 +194,7 @@ describe('User Registration Test', () => {
     });
     after(async () => {
       const userToDelete = await fetchUser({ username: user.username });
-      await destroyUser(userToDelete.id, true);
+      if (userToDelete) { await destroyUser(userToDelete.id, true); }
     });
   });
 });
