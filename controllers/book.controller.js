@@ -9,7 +9,7 @@ class BookController {
 
   /**
    * @desc Create book
-   * @route POST /api/v1/book
+   * @route POST /api/v1/books
    * @access Private
    */
   postBook = asyncHandler(async (req, res) => {
@@ -26,7 +26,7 @@ class BookController {
 
   /**
    * @desc Edit book
-   * @route PUT /api/v1/book/:id
+   * @route PUT /api/v1/books/:id
    * @access Private
    */
   putBook = asyncHandler(async (req, res, next) => {
@@ -51,7 +51,7 @@ class BookController {
 
   /**
    * @desc Edit book to only increase the number of books in store
-   * @route PUT /api/v1/book/:id
+   * @route PUT /api/v1/books/:id
    * @access Private
    */
   putInStockBook = asyncHandler(async (req, res, next) => {
@@ -69,6 +69,61 @@ class BookController {
     return res.status(202).json({
       success: true,
       data: book,
+    });
+  });
+
+  /**
+   * @desc Get books
+   * @route GET /api/v1/books
+   * @access Private
+   */
+  getBooks = asyncHandler(async (req, res) => {
+    res.status(200).json(res.advancedResults);
+  });
+
+  /**
+   * @desc Get book
+   * @route GET /api/v1/books/:id
+   * @access Private
+   */
+  getBook = asyncHandler(async (req, res, next) => {
+    // Add user to req.body
+    const { id } = req.params;
+    req.body.authorInformation = req.user;
+
+    const book = await this.bookLib.fetchBook({ _id: id });
+    if (!book) {
+      return next(
+        new ErrorResponse(`Book with id: ${id} does not exist on the database`, 404),
+      );
+    }
+    return res.status(200).json({
+      success: true,
+      data: book,
+    });
+  });
+
+  /**
+   * @desc Delete book
+   * @route DELETE /api/v1/books/:id
+   * @access Private
+   */
+  deleteBook = asyncHandler(async (req, res, next) => {
+    // Add user to req.body
+    const { id } = req.params;
+    req.body.authorInformation = req.user;
+    const rawData = req.body;
+
+    let book = await this.bookLib.fetchBook({ _id: id });
+    if (!book) {
+      return next(
+        new ErrorResponse(`Book with id: ${id} does not exist on the database`, 404),
+      );
+    }
+
+    book = await this.bookLib.destroyBook(id, rawData);
+    return res.status(202).json({
+      success: true,
     });
   });
 }

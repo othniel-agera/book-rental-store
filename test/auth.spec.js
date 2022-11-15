@@ -1,4 +1,4 @@
-/* const {
+const {
   app, expect, request, putRequest, getRequest,
 } = require('./common.spec');
 const UserLib = require('../lib/user.lib');
@@ -198,4 +198,3 @@ describe('User Registration Test', () => {
     });
   });
 });
- */

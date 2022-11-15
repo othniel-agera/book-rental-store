@@ -1,5 +1,5 @@
 const {
-  app, expect, request, postRequest, putRequest,
+  app, expect, request, postRequest, putRequest, getRequest, deleteRequest,
 } = require('./common.spec');
 const UserLib = require('../lib/user.lib');
 const BookLib = require('../lib/book.lib');
@@ -30,7 +30,7 @@ describe('Book related tests', () => {
     token = response.body.accessToken;
   });
   describe('Positive Tests', () => {
-    /* it('should create a book successfully', async () => {
+    it('should create a book successfully', async () => {
       const response = await postRequest('/books', token)
         .send({
           title: `${Date.now()}_Devworks  Bootcamp`,
@@ -59,7 +59,7 @@ describe('Book related tests', () => {
       expect(resp_data.data).to.have.property('_id');
       expect(resp_data.data).to.have.property('createdAt');
       expect(resp_data.data).to.have.property('updatedAt');
-    }); */
+    });
     it('should edit a book successfully', async () => {
       const book = await createBook({
         title: `${Date.now()}_Devworks  Bootcamp`,
@@ -124,9 +124,78 @@ describe('Book related tests', () => {
       expect(resp_data.data).to.have.property('quantity');
       expect(resp_data.data.quantity).to.have.property('inStock');
     });
+    it('should all the books successfully', async () => {
+      const response = await getRequest('/books', token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('count');
+      expect(resp_data).to.have.property('pagination');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.accessToken).to.not.equal(true);
+      expect(resp_data.data).to.be.an('array');
+    });
+    it('should get a specific book successfully', async () => {
+      const book = await createBook({
+        title: `${Date.now()}_Devworks  Bootcamp`,
+        description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
+        subject: 'technology',
+        authorInformation: '636cda0b011883107d392958',
+        dimension: {
+          height: 5,
+          width: 10,
+          unitOfMeasurement: 'cm',
+        },
+        pricing: {
+          dailyRate: 5,
+          currency: 'NGN',
+        },
+      });
+      // eslint-disable-next-line no-underscore-dangle
+      const response = await getRequest(`/books/${book._id}`, token)
+        .send({ inStock: 23 })
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.accessToken).to.not.equal(true);
+      expect(resp_data.data).to.be.an('object');
+      expect(resp_data.data).to.have.property('_id');
+    });
+    it('should delet a specific book successfully', async () => {
+      const book = await createBook({
+        title: `${Date.now()}_Devworks  Bootcamp`,
+        description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
+        subject: 'technology',
+        authorInformation: '636cda0b011883107d392958',
+        dimension: {
+          height: 5,
+          width: 10,
+          unitOfMeasurement: 'cm',
+        },
+        pricing: {
+          dailyRate: 5,
+          currency: 'NGN',
+        },
+      });
+      // eslint-disable-next-line no-underscore-dangle
+      const response = await deleteRequest(`/books/${book._id}`, token)
+        .send({ inStock: 23 })
+        .expect(202);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data.success).to.be.an('boolean');
+    });
   });
   describe('Negative Tests', () => {
-  /*
     it('should not create book successfully title of book already exists', async () => {
       const title = `${Date.now()}_Devworks  Bootcamp`;
       await createBook({
@@ -198,7 +267,6 @@ describe('Book related tests', () => {
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.equal(`ValidationError: "description" is required`);
     });
-    */
     it('should not update book successfully, invalid ID', async () => {
       const response = await putRequest('/books/eeeeeee', token)
         .send({
@@ -269,6 +337,34 @@ describe('Book related tests', () => {
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.contain(`ValidationError`);
+    });
+    it('should not get book successfully, no such user ID', async () => {
+      const response = await getRequest('/books/636cda0b011883107d392958', token)
+        .expect(404);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      // eslint-disable-next-line quotes
+      expect(resp_data.error).to.contain(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
+    });
+    it('should not delete book successfully, no such user ID', async () => {
+      const response = await deleteRequest('/books/636cda0b011883107d392958', token)
+        .expect(404);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      // eslint-disable-next-line quotes
+      expect(resp_data.error).to.contain(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
     });
   });
   // eslint-disable-next-line func-names

@@ -1,14 +1,16 @@
 const { Router } = require('express');
 const { authenticate } = require('../middlewares/authentication.middleware');
+const advancedResults = require('../middlewares/advancedResults.middleware');
 const {
-  postBook, putBook, putInStockBook,
+  postBook, putBook, putInStockBook, getBooks, getBook, deleteBook,
 } = require('../controllers/book.controller');
 const Validator = require('../utils/validator.util');
+const Book = require('../models/book.model');
 
 const router = Router();
 
-router.route('/').post(authenticate, Validator.postBookValidator, postBook);
+router.route('/').post(authenticate, Validator.postBookValidator, postBook).get(authenticate, advancedResults(Book), getBooks);
 router.route('/:id/add-instock').put(authenticate, Validator.putInStockBookValidator, putInStockBook);
-router.route('/:id').put(authenticate, Validator.putBookValidator, putBook);
+router.route('/:id').put(authenticate, Validator.putBookValidator, putBook).get(authenticate, getBook).delete(authenticate, deleteBook);
 
 module.exports = router;
