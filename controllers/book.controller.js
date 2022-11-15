@@ -35,14 +35,15 @@ class BookController {
     req.body.authorInformation = req.user;
     const rawData = req.body;
 
-    let book = await this.bookLib.fetchBook(id);
+    let book = await this.bookLib.fetchBook({ _id: id });
     if (!book) {
       return next(
         new ErrorResponse(`Book with id: ${id} does not exist on the database`, 404),
       );
     }
+
     book = await this.bookLib.updateBook(id, rawData);
-    return res.status(201).json({
+    return res.status(202).json({
       success: true,
       data: book,
     });
@@ -58,15 +59,14 @@ class BookController {
     const { id } = req.params;
     const { inStock } = req.body;
 
-    let book = await this.bookLib.fetchBook(id);
-    console.log(book);
+    let book = await this.bookLib.fetchBook({ _id: id });
     if (!book) {
       return next(
         new ErrorResponse(`Book with id: ${id} does not exist on the database`, 404),
       );
     }
     book = await this.bookLib.updateBook(id, { $set: { 'quantity.inStock': inStock } });
-    return res.status(201).json({
+    return res.status(202).json({
       success: true,
       data: book,
     });
