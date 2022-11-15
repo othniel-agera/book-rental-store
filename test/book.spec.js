@@ -11,7 +11,8 @@ const { createBook } = new BookLib();
 describe('Book related tests', () => {
   let token;
   let userToDelete;
-  const user = {
+  let user;
+  const userData = {
     username: `${Date.now()}_kufre`,
     firstname: `${Date.now()}_Kufre`,
     lastname: `${Date.now()}_Okon`,
@@ -21,11 +22,11 @@ describe('Book related tests', () => {
     // eslint-disable-next-line func-names
   before(async function () {
     this.timeout(10000);
-    const password = await hashPassword(user.password);
-    await createUser({ ...user, password });
+    const password = await hashPassword(userData.password);
+    user = await createUser({ ...userData, password });
     const response = await request(app)
       .post('/api/v1/auth/login')
-      .send({ email: user.email, password: user.password })
+      .send({ email: userData.email, password: userData.password })
       .set('Accept', 'application/json');
     token = response.body.accessToken;
   });
@@ -36,7 +37,7 @@ describe('Book related tests', () => {
           title: `${Date.now()}_Devworks  Bootcamp`,
           description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
           subject: 'technology',
-          authorInformation: '636cda0b011883107d392958',
+          authorInformation: user.id,
           dimension: {
             height: 5,
             width: 10,
@@ -65,7 +66,7 @@ describe('Book related tests', () => {
         title: `${Date.now()}_Devworks  Bootcamp`,
         description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
         subject: 'technology',
-        authorInformation: '636cda0b011883107d392958',
+        authorInformation: user.id,
         dimension: {
           height: 5,
           width: 10,
@@ -97,7 +98,7 @@ describe('Book related tests', () => {
         title: `${Date.now()}_Devworks  Bootcamp`,
         description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
         subject: 'technology',
-        authorInformation: '636cda0b011883107d392958',
+        authorInformation: user.id,
         dimension: {
           height: 5,
           width: 10,
@@ -143,7 +144,7 @@ describe('Book related tests', () => {
         title: `${Date.now()}_Devworks  Bootcamp`,
         description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
         subject: 'technology',
-        authorInformation: '636cda0b011883107d392958',
+        authorInformation: user.id,
         dimension: {
           height: 5,
           width: 10,
@@ -173,7 +174,7 @@ describe('Book related tests', () => {
         title: `${Date.now()}_Devworks  Bootcamp`,
         description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
         subject: 'technology',
-        authorInformation: '636cda0b011883107d392958',
+        authorInformation: user.id,
         dimension: {
           height: 5,
           width: 10,
@@ -202,7 +203,7 @@ describe('Book related tests', () => {
         title,
         description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
         subject: 'technology',
-        authorInformation: '636cda0b011883107d392958',
+        authorInformation: user.id,
         dimension: {
           height: 5,
           width: 10,
@@ -218,7 +219,7 @@ describe('Book related tests', () => {
           title: 'Devworks  Bootcamp',
           description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
           subject: 'technology',
-          authorInformation: '636cda0b011883107d392958',
+          authorInformation: user.id,
           dimension: {
             height: 5,
             width: 10,
@@ -244,7 +245,7 @@ describe('Book related tests', () => {
         .send({
           title: `${Date.now()}_Devworks  Bootcamp`,
           subject: 'technology',
-          authorInformation: '636cda0b011883107d392958',
+          authorInformation: user.id,
           dimension: {
             height: 5,
             width: 10,
@@ -272,7 +273,7 @@ describe('Book related tests', () => {
         .send({
           title: `${Date.now()}_Devworks  Bootcamp`,
           subject: 'technology',
-          authorInformation: '636cda0b011883107d392958',
+          authorInformation: user.id,
           dimension: {
             height: 5,
             width: 10,
@@ -300,7 +301,7 @@ describe('Book related tests', () => {
         .send({
           title: `${Date.now()}_Devworks  Bootcamp`,
           subject: 'technology',
-          authorInformation: '636cda0b011883107d392958',
+          authorInformation: user.id,
           dimension: {
             height: 5,
             width: 10,
