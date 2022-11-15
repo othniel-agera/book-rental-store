@@ -2,7 +2,6 @@ const ErrorResponse = require('../utils/errorResponse.util');
 
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, _next) => {
-  res.header('Content-Type', 'application/json');
   let error = { ...err };
   error.message = err.message;
 

@@ -125,7 +125,7 @@ describe('Book related tests', () => {
       expect(resp_data.data).to.have.property('quantity');
       expect(resp_data.data.quantity).to.have.property('inStock');
     });
-    it('should all the books successfully', async () => {
+    it('should get all the books successfully', async () => {
       const response = await getRequest('/books', token)
         .expect(200);
 
@@ -138,6 +138,25 @@ describe('Book related tests', () => {
       expect(resp_data.success).to.be.an('boolean');
       expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('array');
+    });
+    it('should get all my books successfully', async () => {
+      createBook({
+        title: `${Date.now()}_Devworks  Bootcamp`,
+        description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
+        subject: 'technology',
+        authorInformation: user.id,
+        dimension: {
+          height: 5,
+          width: 10,
+          unitOfMeasurement: 'cm',
+        },
+        pricing: {
+          dailyRate: 5,
+          currency: 'NGN',
+        },
+      });
+      await getRequest('/books/mine', token)
+        .expect(302);
     });
     it('should get a specific book successfully', async () => {
       const book = await createBook({
@@ -157,7 +176,6 @@ describe('Book related tests', () => {
       });
       // eslint-disable-next-line no-underscore-dangle
       const response = await getRequest(`/books/${book._id}`, token)
-        .send({ inStock: 23 })
         .expect(200);
 
       const resp_data = response.body;
@@ -169,7 +187,7 @@ describe('Book related tests', () => {
       expect(resp_data.data).to.be.an('object');
       expect(resp_data.data).to.have.property('_id');
     });
-    it('should delet a specific book successfully', async () => {
+    it('should delete a specific book successfully', async () => {
       const book = await createBook({
         title: `${Date.now()}_Devworks  Bootcamp`,
         description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',

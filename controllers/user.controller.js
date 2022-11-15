@@ -68,7 +68,7 @@ class AuthController {
           new ErrorResponse('Please provide an email and password', 400),
         );
       }
-      const user = await this.userLib.fetchUser({
+      const user = await this.userLib.fetchUserWithPassword({
         email: data.email,
       });
       if (!user) {
@@ -78,7 +78,7 @@ class AuthController {
       }
       const passwordMatch = await comparePasswords(password, user.password);
       if (passwordMatch) {
-        sendTokenResponse(user, 200, res);
+        return sendTokenResponse(user, 200, res);
       }
       return next(
         new ErrorResponse('Incorrect email or password', 401),

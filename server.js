@@ -11,8 +11,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(morgan('dev'));
 
-app.set('base', '/api/v1');
-app.use('/api/v1', routes);
+app.set('base', `${process.env.BASE_URL}`);
+app.use(`${process.env.BASE_URL}`, routes);
 
 app.use(errorHandler);
 

@@ -82,6 +82,17 @@ class BookController {
   });
 
   /**
+   * @desc Get all my books
+   * @route GET /api/v1/books
+   * @access Private
+   */
+  getMyBooks = asyncHandler(async (req, res) => {
+    const authorInformation = req.user;
+    // eslint-disable-next-line no-underscore-dangle
+    return res.redirect(`${process.env.BASE_URL}/books?authorInformation=${authorInformation.id}`);
+  });
+
+  /**
    * @desc Get book
    * @route GET /api/v1/books/:id
    * @access Private
