@@ -13,7 +13,7 @@ env:
   API_KEY: XXXXXXXXXXXX
   SESSION_SECRET: eewsldd
   DB_URI: ${{ secrets.MONGODB_URI }}
-  BASE_URL=: /api/v1
+  BASE_URL: /api/v1
 
 jobs:
   build:
