@@ -28,7 +28,9 @@ describe('User Registration Test', () => {
         .set('Accept', 'application/json');
       token = response.body.accessToken;
     });
-    it('should register user successfully', async () => {
+    // eslint-disable-next-line func-names
+    it('should register user successfully', async function () {
+      this.timeout(10000);
       const response = await request(app)
         .post('/api/v1/auth/signup')
         .send({
