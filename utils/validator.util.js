@@ -45,7 +45,7 @@ class Validator {
       description: Joi.string().required(),
       subject: Joi.string().required(),
       authorInformation: Joi.string().required().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid author ID');
         return value;
       }, 'ObjectID Validation'),
       dimension: Joi.object({
@@ -70,7 +70,7 @@ class Validator {
       description: Joi.string(),
       subject: Joi.string(),
       authorInformation: Joi.string().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid author ID');
         return value;
       }, 'ObjectID Validation'),
       dimension: Joi.object({
@@ -101,15 +101,15 @@ class Validator {
       reviewText: Joi.string().required(),
       stars: Joi.number().max(5).min(1),
       user: Joi.string().required().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
         return value;
       }, 'ObjectID Validation'),
       book: Joi.string().required().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
         return value;
       }, 'ObjectID Validation'),
       likes: Joi.array().items(Joi.string().required().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
         return value;
       }, 'ObjectID Validation')),
     }),
@@ -120,15 +120,15 @@ class Validator {
       reviewText: Joi.string(),
       stars: Joi.number().max(5).min(1),
       user: Joi.string().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
         return value;
       }, 'ObjectID Validation'),
       book: Joi.string().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
         return value;
       }, 'ObjectID Validation'),
       likes: Joi.array().items(Joi.string().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
         return value;
       }, 'ObjectID Validation')),
     }),
