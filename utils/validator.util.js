@@ -94,6 +94,45 @@ class Validator {
       inStock: Joi.number(),
     }),
   });
+
+  // Validators for review routes
+  static postReviewValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      reviewText: Joi.string().required(),
+      stars: Joi.number().max(5).min(1),
+      user: Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        return value;
+      }, 'ObjectID Validation'),
+      book: Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        return value;
+      }, 'ObjectID Validation'),
+      likes: Joi.array().items(Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        return value;
+      }, 'ObjectID Validation')),
+    }),
+  });
+
+  static putReviewValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      reviewText: Joi.string().required(),
+      stars: Joi.number().max(5).min(1),
+      user: Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        return value;
+      }, 'ObjectID Validation'),
+      book: Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        return value;
+      }, 'ObjectID Validation'),
+      likes: Joi.array().items(Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        return value;
+      }, 'ObjectID Validation')),
+    }),
+  });
 }
 
 module.exports = Validator;
