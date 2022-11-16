@@ -62,4 +62,6 @@ const BookSchema = new Schema(
   },
 );
 
+/* delete all reviews when book is deleted */
+
 module.exports = mongoose.model('book', BookSchema);

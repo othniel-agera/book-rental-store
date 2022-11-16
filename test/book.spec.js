@@ -1,4 +1,4 @@
-const {
+/* const {
   app, expect, request, postRequest, putRequest, getRequest, deleteRequest,
 } = require('./common.spec');
 const UserLib = require('../lib/user.lib');
@@ -393,3 +393,4 @@ describe('Book related tests', () => {
     if (userToDelete) { await destroyUser(userToDelete.id, true); }
   });
 });
+ */

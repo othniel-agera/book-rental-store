@@ -1,17 +1,21 @@
+const { ObjectID } = require('mongodb');
 const {
   app, expect, request, postRequest, putRequest, getRequest, deleteRequest,
 } = require('./common.spec');
 const UserLib = require('../lib/user.lib');
 const BookLib = require('../lib/book.lib');
+const ReviewLib = require('../lib/review.lib');
 const { hashPassword } = require('../utils/utility.util');
 
 const { createUser, fetchUser, destroyUser } = new UserLib();
 const { createBook } = new BookLib();
+const { createReview } = new ReviewLib();
 
 describe('Review related tests', () => {
   let token;
   let userToDelete;
   let user;
+  let book;
   const userData = {
     username: `${Date.now()}_kufre`,
     firstname: `${Date.now()}_Kufre`,
@@ -29,25 +33,33 @@ describe('Review related tests', () => {
       .send({ email: userData.email, password: userData.password })
       .set('Accept', 'application/json');
     token = response.body.accessToken;
+    book = await createBook({
+      title: `${Date.now()}_Devworks  Bootcamp`,
+      description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
+      subject: 'technology',
+      authorInformation: user.id,
+      dimension: {
+        height: 5,
+        width: 10,
+        unitOfMeasurement: 'cm',
+      },
+      pricing: {
+        dailyRate: 5,
+        currency: 'NGN',
+      },
+    });
   });
   describe('Positive Tests', () => {
     it('should review a book successfully', async () => {
-      const response = await postRequest('/books', token)
-        .send({
-          title: `${Date.now()}_Devworks  Bootcamp`,
-          description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
-          subject: 'technology',
-          authorInformation: user.id,
-          dimension: {
-            height: 5,
-            width: 10,
-            unitOfMeasurement: 'cm',
+      const response = await postRequest('/reviews', token)
+        .send(
+          {
+            reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+            stars: 3,
+            user: user.id,
+            book: book.id,
           },
-          pricing: {
-            dailyRate: 5,
-            currency: 'NGN',
-          },
-        })
+        )
         .expect(201);
 
       const resp_data = response.body;
@@ -62,24 +74,15 @@ describe('Review related tests', () => {
       expect(resp_data.data).to.have.property('updatedAt');
     });
     it('should edit a book review successfully', async () => {
-      const book = await createBook({
-        title: `${Date.now()}_Devworks  Bootcamp`,
-        description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
-        subject: 'technology',
-        authorInformation: user.id,
-        dimension: {
-          height: 5,
-          width: 10,
-          unitOfMeasurement: 'cm',
-        },
-        pricing: {
-          dailyRate: 5,
-          currency: 'NGN',
-        },
+      const review = await createReview({
+        reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+        stars: 3,
+        user: user.id,
+        book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
-      const response = await putRequest(`/books/${book._id}`, token)
-        .send({ title: `${Date.now()}_Devworks  Bootcamp` })
+      const response = await putRequest(`/reviews/${review._id}`, token)
+        .send({ reviewText: `${Date.now()}_Devworks  Bootcamp review` })
         .expect(202);
 
       const resp_data = response.body;
@@ -92,26 +95,18 @@ describe('Review related tests', () => {
       expect(resp_data.data).to.have.property('_id');
       expect(resp_data.data).to.have.property('createdAt');
       expect(resp_data.data).to.have.property('updatedAt');
+      expect(resp_data.data.createdAt).to.not.equal(resp_data.data.updatedAt);
     });
     it('should like book review successfully', async () => {
-      const book = await createBook({
-        title: `${Date.now()}_Devworks  Bootcamp`,
-        description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
-        subject: 'technology',
-        authorInformation: user.id,
-        dimension: {
-          height: 5,
-          width: 10,
-          unitOfMeasurement: 'cm',
-        },
-        pricing: {
-          dailyRate: 5,
-          currency: 'NGN',
-        },
+      const review = await createReview({
+        reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+        stars: 3,
+        user: user.id,
+        book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
-      const response = await putRequest(`/books/${book._id}/add-instock`, token)
-        .send({ inStock: 23 })
+      const response = await putRequest(`/reviews/${review._id}/like`, token)
+        .send({ reviewText: `${Date.now()}_Devworks  Bootcamp review` })
         .expect(202);
 
       const resp_data = response.body;
@@ -122,11 +117,12 @@ describe('Review related tests', () => {
       expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('object');
       expect(resp_data.data).to.have.property('_id');
-      expect(resp_data.data).to.have.property('quantity');
-      expect(resp_data.data.quantity).to.have.property('inStock');
+      expect(resp_data.data).to.have.property('createdAt');
+      expect(resp_data.data).to.have.property('updatedAt');
+      expect(resp_data.data.createdAt).to.not.equal(resp_data.data.updatedAt);
     });
     it('should get all the reviews to a books successfully', async () => {
-      const response = await getRequest('/books', token)
+      const response = await getRequest('/reviews', token)
         .expect(200);
 
       const resp_data = response.body;
@@ -140,23 +136,14 @@ describe('Review related tests', () => {
       expect(resp_data.data).to.be.an('array');
     });
     it('should get a specific book review successfully', async () => {
-      const book = await createBook({
-        title: `${Date.now()}_Devworks  Bootcamp`,
-        description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
-        subject: 'technology',
-        authorInformation: user.id,
-        dimension: {
-          height: 5,
-          width: 10,
-          unitOfMeasurement: 'cm',
-        },
-        pricing: {
-          dailyRate: 5,
-          currency: 'NGN',
-        },
+      const review = await createReview({
+        reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+        stars: 3,
+        user: user.id,
+        book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
-      const response = await getRequest(`/books/${book._id}`, token)
+      const response = await getRequest(`/reviews/${review._id}`, token)
         .expect(200);
 
       const resp_data = response.body;
@@ -169,23 +156,14 @@ describe('Review related tests', () => {
       expect(resp_data.data).to.have.property('_id');
     });
     it('should delete a specific review successfully', async () => {
-      const book = await createBook({
-        title: `${Date.now()}_Devworks  Bootcamp`,
-        description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
-        subject: 'technology',
-        authorInformation: user.id,
-        dimension: {
-          height: 5,
-          width: 10,
-          unitOfMeasurement: 'cm',
-        },
-        pricing: {
-          dailyRate: 5,
-          currency: 'NGN',
-        },
+      const review = await createReview({
+        reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+        stars: 3,
+        user: user.id,
+        book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
-      const response = await deleteRequest(`/books/${book._id}`, token)
+      const response = await deleteRequest(`/reviews/${review._id}`, token)
         .send({ inStock: 23 })
         .expect(202);
 
@@ -197,20 +175,11 @@ describe('Review related tests', () => {
   });
   describe('Negative Tests', () => {
     it('should not review a book successfully, reviewText is missing', async () => {
-      const response = await postRequest('/books', token)
+      const response = await postRequest('/reviews', token)
         .send({
-          title: `${Date.now()}_Devworks  Bootcamp`,
-          subject: 'technology',
-          authorInformation: user.id,
-          dimension: {
-            height: 5,
-            width: 10,
-            unitOfMeasurement: 'cm',
-          },
-          pricing: {
-            dailyRate: 5,
-            currency: 'NGN',
-          },
+          stars: 3,
+          user: user.id,
+          book: book.id,
         })
         .expect(422);
 
@@ -222,23 +191,16 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`ValidationError: "description" is required`);
+      expect(resp_data.error).to.equal(`ValidationError: "reviewText" is required`);
     });
     it('should not review a book successfully, invalid book ID', async () => {
-      const response = await postRequest('/books', token)
+      const objID = new ObjectID();
+      const response = await postRequest('/reviews', token)
         .send({
-          title: `${Date.now()}_Devworks  Bootcamp`,
-          subject: 'technology',
-          authorInformation: user.id,
-          dimension: {
-            height: 5,
-            width: 10,
-            unitOfMeasurement: 'cm',
-          },
-          pricing: {
-            dailyRate: 5,
-            currency: 'NGN',
-          },
+          reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+          stars: 3,
+          user: user.id,
+          book: objID,
         })
         .expect(422);
 
@@ -250,23 +212,15 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`ValidationError: "description" is required`);
+      expect(resp_data.error).to.equal(`Book with id: ${objID} is not in database`);
     });
     it('should not update a book review successfully, invalid ID', async () => {
-      const response = await putRequest('/books/eeeeeee', token)
+      const response = await putRequest('/reviews/eeeeeee', token)
         .send({
-          title: `${Date.now()}_Devworks  Bootcamp`,
-          subject: 'technology',
-          authorInformation: user.id,
-          dimension: {
-            height: 5,
-            width: 10,
-            unitOfMeasurement: 'cm',
-          },
-          pricing: {
-            dailyRate: 5,
-            currency: 'NGN',
-          },
+          reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+          stars: 3,
+          user: user.id,
+          book: book.id,
         })
         .expect(404);
 
@@ -281,20 +235,13 @@ describe('Review related tests', () => {
       expect(resp_data.error).to.equal(`Resource not found.`);
     });
     it('should not update a book review successfully, no such review ID', async () => {
-      const response = await putRequest('/books/636cda0b011883107d392958', token)
+      const objID = new ObjectID();
+      const response = await putRequest(`/reviews/${objID}`, token)
         .send({
-          title: `${Date.now()}_Devworks  Bootcamp`,
-          subject: 'technology',
-          authorInformation: user.id,
-          dimension: {
-            height: 5,
-            width: 10,
-            unitOfMeasurement: 'cm',
-          },
-          pricing: {
-            dailyRate: 5,
-            currency: 'NGN',
-          },
+          reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+          stars: 3,
+          user: user.id,
+          book: book.id,
         })
         .expect(404);
 
@@ -306,11 +253,11 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
+      expect(resp_data.error).to.equal(`Review with id: ${objID} does not exist on the database`);
     });
     it('should not like book review successfully', async () => {
-      const response = await putRequest('/books/636cda0b011883107d392958/add-instock', token)
-        .send({ title: `${Date.now()}_Devworks  Bootcamp` })
+      const response = await putRequest('/reviews/636cda0b011883107d392958/like', token)
+        .send({})
         .expect(422);
 
       const resp_data = response.body;
@@ -324,7 +271,8 @@ describe('Review related tests', () => {
       expect(resp_data.error).to.contain(`ValidationError`);
     });
     it('should not get book successfully, no such review ID', async () => {
-      const response = await getRequest('/books/636cda0b011883107d392958', token)
+      const objID = new ObjectID();
+      const response = await getRequest(`/reviews/${objID}`, token)
         .expect(404);
 
       const resp_data = response.body;
@@ -335,10 +283,11 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.contain(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
+      expect(resp_data.error).to.contain(`Review with id: ${objID} does not exist on the database`);
     });
     it('should not delete book successfully, no such review ID', async () => {
-      const response = await deleteRequest('/books/636cda0b011883107d392958', token)
+      const objID = new ObjectID();
+      const response = await deleteRequest(`/reviews/${objID}`, token)
         .expect(404);
 
       const resp_data = response.body;
@@ -349,7 +298,7 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.contain(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
+      expect(resp_data.error).to.contain(`Review with id: ${objID} does not exist on the database`);
     });
   });
   // eslint-disable-next-line func-names
