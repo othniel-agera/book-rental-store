@@ -45,7 +45,7 @@ class Validator {
       description: Joi.string().required(),
       subject: Joi.string().required(),
       authorInformation: Joi.string().required().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid author ID');
         return value;
       }, 'ObjectID Validation'),
       dimension: Joi.object({
@@ -70,7 +70,7 @@ class Validator {
       description: Joi.string(),
       subject: Joi.string(),
       authorInformation: Joi.string().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid author ID');
         return value;
       }, 'ObjectID Validation'),
       dimension: Joi.object({
