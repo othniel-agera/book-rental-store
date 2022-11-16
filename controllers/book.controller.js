@@ -100,7 +100,6 @@ class BookController {
   getBook = asyncHandler(async (req, res, next) => {
     // Add user to req.body
     const { id } = req.params;
-    req.body.authorInformation = req.user;
 
     const book = await this.bookLib.fetchBook({ _id: id });
     if (!book) {
@@ -122,8 +121,6 @@ class BookController {
   deleteBook = asyncHandler(async (req, res, next) => {
     // Add user to req.body
     const { id } = req.params;
-    req.body.authorInformation = req.user;
-    const rawData = req.body;
 
     let book = await this.bookLib.fetchBook({ _id: id });
     if (!book) {
@@ -132,7 +129,7 @@ class BookController {
       );
     }
 
-    book = await this.bookLib.destroyBook(id, rawData);
+    book = await this.bookLib.destroyBook(id);
     return res.status(202).json({
       success: true,
     });
