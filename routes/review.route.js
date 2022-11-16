@@ -9,7 +9,7 @@ const Review = require('../models/review.model');
 
 const router = Router();
 
-router.route('/').post(authenticate, Validator.postReviewValidator, postReview).get(authenticate, advancedResults(Review, 'authorInformation'), getReviews);
+router.route('/').post(authenticate, Validator.postReviewValidator, postReview).get(authenticate, advancedResults(Review, 'user'), getReviews);
 
 router.route('/:id').put(authenticate, Validator.putReviewValidator, putReview).get(authenticate, getReview).delete(authenticate, deleteReview);
 

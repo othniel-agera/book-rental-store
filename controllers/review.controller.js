@@ -4,7 +4,7 @@ const ErrorResponse = require('../utils/errorResponse.util');
 
 class ReviewController {
   constructor() {
-    this.bookLib = new ReviewLib();
+    this.reviewLib = new ReviewLib();
   }
 
   /**
@@ -12,15 +12,16 @@ class ReviewController {
    * @route POST /api/v1/reviews
    * @access Private
    */
+  // eslint-disable-next-line func-names
   postReview = asyncHandler(async (req, res) => {
     // Add user to req.body
     req.body.authorInformation = req.user;
     const rawData = req.body;
-
-    const book = await this.bookLib.createReview(rawData);
+    await this.reviewLib.checkResourceInDB({ user: rawData.user, book: rawData.book });
+    const review = await this.reviewLib.createReview(rawData);
     return res.status(201).json({
       success: true,
-      data: book,
+      data: review,
     });
   });
 
@@ -35,17 +36,17 @@ class ReviewController {
     req.body.authorInformation = req.user;
     const rawData = req.body;
 
-    let book = await this.bookLib.fetchReview({ _id: id });
-    if (!book) {
+    let review = await this.reviewLib.fetchReview({ _id: id });
+    if (!review) {
       return next(
         new ErrorResponse(`Review with id: ${id} does not exist on the database`, 404),
       );
     }
 
-    book = await this.bookLib.updateReview(id, rawData);
+    review = await this.reviewLib.updateReview(id, rawData);
     return res.status(202).json({
       success: true,
-      data: book,
+      data: review,
     });
   });
 
@@ -68,15 +69,15 @@ class ReviewController {
     const { id } = req.params;
     req.body.authorInformation = req.user;
 
-    const book = await this.bookLib.fetchReview({ _id: id });
-    if (!book) {
+    const review = await this.reviewLib.fetchReview({ _id: id });
+    if (!review) {
       return next(
         new ErrorResponse(`Review with id: ${id} does not exist on the database`, 404),
       );
     }
     return res.status(200).json({
       success: true,
-      data: book,
+      data: review,
     });
   });
 
@@ -91,14 +92,14 @@ class ReviewController {
     req.body.authorInformation = req.user;
     const rawData = req.body;
 
-    let book = await this.bookLib.fetchReview({ _id: id });
-    if (!book) {
+    let review = await this.reviewLib.fetchReview({ _id: id });
+    if (!review) {
       return next(
         new ErrorResponse(`Review with id: ${id} does not exist on the database`, 404),
       );
     }
 
-    book = await this.bookLib.destroyReview(id, rawData);
+    review = await this.reviewLib.destroyReview(id, rawData);
     return res.status(202).json({
       success: true,
     });

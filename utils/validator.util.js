@@ -117,17 +117,17 @@ class Validator {
 
   static putReviewValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
-      reviewText: Joi.string().required(),
+      reviewText: Joi.string(),
       stars: Joi.number().max(5).min(1),
-      user: Joi.string().required().custom((value, helper) => {
+      user: Joi.string().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
         return value;
       }, 'ObjectID Validation'),
-      book: Joi.string().required().custom((value, helper) => {
+      book: Joi.string().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
         return value;
       }, 'ObjectID Validation'),
-      likes: Joi.array().items(Joi.string().required().custom((value, helper) => {
+      likes: Joi.array().items(Joi.string().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid MongoDB Object ID');
         return value;
       }, 'ObjectID Validation')),
