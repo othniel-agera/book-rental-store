@@ -1,6 +1,8 @@
+const Review = require('../models/review.model');
 const ReviewLib = require('../lib/review.lib');
 const asyncHandler = require('../middlewares/async.middleware');
 const ErrorResponse = require('../utils/errorResponse.util');
+const advancedResults = require('../utils/advancedResults.util');
 
 class ReviewController {
   constructor() {
@@ -56,7 +58,14 @@ class ReviewController {
    * @access Private
    */
   getReviews = asyncHandler(async (req, res) => {
-    res.status(200).json(res.advancedResults);
+    const page = parseInt(req.query.page, 10);
+    const limit = parseInt(req.query.limit, 10);
+    const result = await advancedResults(Review, req.query, { page, limit });
+
+    res.status(200).json({
+      success: true,
+      ...result,
+    });
   });
 
   /**
