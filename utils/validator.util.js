@@ -49,17 +49,17 @@ class Validator {
         return value;
       }, 'ObjectID Validation'),
       dimension: Joi.object({
-        height: Joi.number().required(),
-        width: Joi.number().required(),
+        height: Joi.number().positive().required(),
+        width: Joi.number().positive().required(),
         unitOfMeasurement: Joi.string().required(),
       }),
       pricing: Joi.object({
-        dailyRate: Joi.number().required(),
+        dailyRate: Joi.number().positive().required(),
         currency: Joi.string().required(),
       }),
       quantity: Joi.object({
-        inStock: Joi.number(),
-        rentedOut: Joi.number(),
+        inStock: Joi.number().positive(),
+        rentedOut: Joi.number().positive(),
       }),
     }),
   });
@@ -74,24 +74,24 @@ class Validator {
         return value;
       }, 'ObjectID Validation'),
       dimension: Joi.object({
-        height: Joi.number(),
-        width: Joi.number(),
+        height: Joi.number().positive(),
+        width: Joi.number().positive(),
         unitOfMeasurement: Joi.string(),
       }),
       pricing: Joi.object({
-        dailyRate: Joi.number(),
+        dailyRate: Joi.number().positive(),
         currency: Joi.string(),
       }),
       quantity: Joi.object({
-        inStock: Joi.number(),
-        rentedOut: Joi.number(),
+        inStock: Joi.number().positive(),
+        rentedOut: Joi.number().positive(),
       }),
     }),
   });
 
   static putInStockBookValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
-      inStock: Joi.number(),
+      inStock: Joi.number().positive(),
     }),
   });
 }
