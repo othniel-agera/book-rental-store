@@ -1,3 +1,4 @@
+const { ObjectID } = require('mongodb');
 const Review = require('../models/review.model');
 const ReviewLib = require('../lib/review.lib');
 const asyncHandler = require('../middlewares/async.middleware');
@@ -14,7 +15,6 @@ class ReviewController {
    * @route POST /api/v1/reviews
    * @access Private
    */
-  // eslint-disable-next-line func-names
   postReview = asyncHandler(async (req, res) => {
     // Add user to req.body
     req.body.authorInformation = req.user;
@@ -46,6 +46,46 @@ class ReviewController {
     }
 
     review = await this.reviewLib.updateReview(id, rawData);
+    return res.status(202).json({
+      success: true,
+      data: review,
+    });
+  });
+
+  /**
+   * @desc Edit review to add a like
+   * @route PUT /api/v1/reviews/:id/likes
+   * @access Private
+   */
+  putReviewLike = asyncHandler(async (req, res, next) => {
+    // Add user to req.body
+    const { user, params, body } = req;
+    const { id } = params;
+    const { action } = body;
+
+    if (!['like', 'unlike'].includes(action)) {
+      return next(new ErrorResponse('Invalid action', 402));
+    }
+
+    let review = await this.reviewLib.fetchReview({ _id: id });
+    if (!review) {
+      return next(
+        new ErrorResponse(`Review with id: ${id} does not exist on the database`, 404),
+      );
+    }
+    let actionObj;
+    if (action === 'like') {
+      actionObj = {
+        $addToSet: { likes: ObjectID(user.id) },
+      };
+    }
+    if (action === 'unlike') {
+      actionObj = {
+        $pull: { likes: ObjectID(user.id) },
+      };
+    }
+
+    review = await this.reviewLib.updateReview(id, actionObj);
     return res.status(202).json({
       success: true,
       data: review,
@@ -87,6 +127,28 @@ class ReviewController {
     return res.status(200).json({
       success: true,
       data: review,
+    });
+  });
+
+  /**
+   * @desc Get review likes
+   * @route GET /api/v1/reviews/:id/likes
+   * @access Private
+   */
+  getReviewLikes = asyncHandler(async (req, res, next) => {
+    // Add user to req.body
+    const { id } = req.params;
+    req.body.authorInformation = req.user;
+
+    const review = await this.reviewLib.fetchReview({ _id: id }, { populate: 'likes', select: 'likes' });
+    if (!review) {
+      return next(
+        new ErrorResponse(`Review with id: ${id} does not exist on the database`, 404),
+      );
+    }
+    return res.status(200).json({
+      success: true,
+      data: review.toObject({ virtuals: true }),
     });
   });
 
