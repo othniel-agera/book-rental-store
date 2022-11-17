@@ -7,7 +7,7 @@ const advancedResults = require('../utils/advancedResults.util');
 
 class RentalController {
   constructor() {
-    this.reviewLib = new RentalLib();
+    this.rentalLib = new RentalLib();
   }
 
   /**
@@ -19,11 +19,11 @@ class RentalController {
     // Add user to req.body
     req.body.authorInformation = req.user;
     const rawData = req.body;
-    await this.reviewLib.checkResourceInDB({ user: rawData.user, book: rawData.book });
-    const review = await this.reviewLib.createRental(rawData);
+    await this.rentalLib.checkResourceInDB({ user: rawData.user, book: rawData.book });
+    const rental = await this.rentalLib.createRental(rawData);
     return res.status(201).json({
       success: true,
-      data: review,
+      data: rental,
     });
   });
 
@@ -38,17 +38,17 @@ class RentalController {
     req.body.authorInformation = req.user;
     const rawData = req.body;
 
-    let review = await this.reviewLib.fetchRental({ _id: id });
-    if (!review) {
+    let rental = await this.rentalLib.fetchRental({ _id: id });
+    if (!rental) {
       return next(
         new ErrorResponse(`Rental with id: ${id} does not exist on the database`, 404),
       );
     }
 
-    review = await this.reviewLib.updateRental(id, rawData);
+    rental = await this.rentalLib.updateRental(id, rawData);
     return res.status(202).json({
       success: true,
-      data: review,
+      data: rental,
     });
   });
 
@@ -67,8 +67,8 @@ class RentalController {
       return next(new ErrorResponse('Invalid action', 400));
     }
 
-    let review = await this.reviewLib.fetchRental({ _id: id });
-    if (!review) {
+    let rental = await this.rentalLib.fetchRental({ _id: id });
+    if (!rental) {
       return next(
         new ErrorResponse(`Rental with id: ${id} does not exist on the database`, 404),
       );
@@ -85,10 +85,10 @@ class RentalController {
       };
     }
 
-    review = await this.reviewLib.updateRental(id, actionObj);
+    rental = await this.rentalLib.updateRental(id, actionObj);
     return res.status(202).json({
       success: true,
-      data: review,
+      data: rental,
     });
   });
 
@@ -118,15 +118,15 @@ class RentalController {
     const { id } = req.params;
     req.body.authorInformation = req.user;
 
-    const review = await this.reviewLib.fetchRental({ _id: id });
-    if (!review) {
+    const rental = await this.rentalLib.fetchRental({ _id: id });
+    if (!rental) {
       return next(
         new ErrorResponse(`Rental with id: ${id} does not exist on the database`, 404),
       );
     }
     return res.status(200).json({
       success: true,
-      data: review,
+      data: rental,
     });
   });
 
@@ -140,15 +140,15 @@ class RentalController {
     const { id } = req.params;
     req.body.authorInformation = req.user;
 
-    const review = await this.reviewLib.fetchRental({ _id: id }, { populate: 'likes', select: 'likes' });
-    if (!review) {
+    const rental = await this.rentalLib.fetchRental({ _id: id }, { populate: 'likes', select: 'likes' });
+    if (!rental) {
       return next(
         new ErrorResponse(`Rental with id: ${id} does not exist on the database`, 404),
       );
     }
     return res.status(200).json({
       success: true,
-      data: review.toObject({ virtuals: true }),
+      data: rental.toObject({ virtuals: true }),
     });
   });
 
@@ -163,14 +163,14 @@ class RentalController {
     req.body.authorInformation = req.user;
     const rawData = req.body;
 
-    let review = await this.reviewLib.fetchRental({ _id: id });
-    if (!review) {
+    let rental = await this.rentalLib.fetchRental({ _id: id });
+    if (!rental) {
       return next(
         new ErrorResponse(`Rental with id: ${id} does not exist on the database`, 404),
       );
     }
 
-    review = await this.reviewLib.destroyRental(id, rawData);
+    rental = await this.rentalLib.destroyRental(id, rawData);
     return res.status(202).json({
       success: true,
     });

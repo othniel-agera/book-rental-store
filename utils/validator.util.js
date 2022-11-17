@@ -133,6 +133,47 @@ class Validator {
       }, 'ObjectID Validation')),
     }),
   });
+
+  // Validators for rental routes
+  static postRentalValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      user: Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
+        return value;
+      }, 'ObjectID Validation'),
+      book: Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
+        return value;
+      }, 'ObjectID Validation'),
+      dueDate: Joi.date().required(),
+      quantity: Joi.number().positive(),
+      isReturned: Joi.boolean(),
+      charge: Joi.object({
+        amount: Joi.number().positive().allow(0),
+        currency: Joi.string(),
+      }),
+    }),
+  });
+
+  static putRentalValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      user: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
+        return value;
+      }, 'ObjectID Validation'),
+      book: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
+        return value;
+      }, 'ObjectID Validation'),
+      dueDate: Joi.date(),
+      quantity: Joi.number().positive(),
+      isReturned: Joi.boolean(),
+      charge: Joi.object({
+        amount: Joi.number().positive().allow(0),
+        currency: Joi.string(),
+      }),
+    }),
+  });
 }
 
 module.exports = Validator;
