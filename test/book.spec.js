@@ -1,4 +1,4 @@
-/* const {
+const {
   app, expect, request, postRequest, putRequest, getRequest, deleteRequest,
 } = require('./common.spec');
 const UserLib = require('../lib/user.lib');
@@ -155,8 +155,18 @@ describe('Book related tests', () => {
           currency: 'NGN',
         },
       });
-      await getRequest('/books/mine', token)
-        .expect(302);
+      const response = await getRequest('/books/mine', token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('count');
+      expect(resp_data).to.have.property('pagination');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.accessToken).to.not.equal(true);
+      expect(resp_data.data).to.be.an('array');
     });
     it('should get a specific book successfully', async () => {
       const book = await createBook({
@@ -234,7 +244,7 @@ describe('Book related tests', () => {
       });
       const response = await postRequest('/books', token)
         .send({
-          title: 'Devworks  Bootcamp',
+          title,
           description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
           subject: 'technology',
           authorInformation: user.id,
@@ -393,4 +403,3 @@ describe('Book related tests', () => {
     if (userToDelete) { await destroyUser(userToDelete.id, true); }
   });
 });
- */

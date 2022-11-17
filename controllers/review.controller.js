@@ -64,7 +64,7 @@ class ReviewController {
     const { action } = body;
 
     if (!['like', 'unlike'].includes(action)) {
-      return next(new ErrorResponse('Invalid action', 402));
+      return next(new ErrorResponse('Invalid action', 400));
     }
 
     let review = await this.reviewLib.fetchReview({ _id: id });

@@ -105,8 +105,8 @@ describe('Review related tests', () => {
         book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
-      const response = await putRequest(`/reviews/${review._id}/like`, token)
-        .send({ reviewText: `${Date.now()}_Devworks  Bootcamp review` })
+      const response = await putRequest(`/reviews/${review._id}/likes`, token)
+        .send({ action: 'like' })
         .expect(202);
 
       const resp_data = response.body;
@@ -120,6 +120,38 @@ describe('Review related tests', () => {
       expect(resp_data.data).to.have.property('createdAt');
       expect(resp_data.data).to.have.property('updatedAt');
       expect(resp_data.data.createdAt).to.not.equal(resp_data.data.updatedAt);
+      expect(resp_data.data.likes).to.be.an('array');
+      expect(resp_data.data.likes).to.include(user.id);
+    });
+    it('should unlike book review successfully', async () => {
+      const review = await createReview({
+        reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+        stars: 3,
+        user: user.id,
+        book: book.id,
+      });
+      // eslint-disable-next-line no-underscore-dangle
+      await putRequest(`/reviews/${review._id}/likes`, token)
+        .send({ action: 'like' })
+        .expect(202);
+      // eslint-disable-next-line no-underscore-dangle
+      const response = await putRequest(`/reviews/${review._id}/likes`, token)
+        .send({ action: 'unlike' })
+        .expect(202);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.accessToken).to.not.equal(true);
+      expect(resp_data.data).to.be.an('object');
+      expect(resp_data.data).to.have.property('_id');
+      expect(resp_data.data).to.have.property('createdAt');
+      expect(resp_data.data).to.have.property('updatedAt');
+      expect(resp_data.data.createdAt).to.not.equal(resp_data.data.updatedAt);
+      expect(resp_data.data.likes).to.be.an('array');
+      expect(resp_data.data.likes).to.not.include(user.id);
     });
     it('should get all the reviews to a books successfully', async () => {
       const response = await getRequest('/reviews', token)
@@ -255,10 +287,11 @@ describe('Review related tests', () => {
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.equal(`Review with id: ${objID} does not exist on the database`);
     });
-    it('should not like book review successfully', async () => {
-      const response = await putRequest('/reviews/636cda0b011883107d392958/like', token)
-        .send({})
-        .expect(422);
+    it('should not like book review successfully, no such review ID', async () => {
+      const objID = new ObjectID();
+      const response = await putRequest(`/reviews/${objID}/likes`, token)
+        .send({ action: 'like' })
+        .expect(404);
 
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
@@ -268,7 +301,29 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.contain(`ValidationError`);
+      expect(resp_data.error).to.equal(`Review with id: ${objID} does not exist on the database`);
+    });
+    it('should not like book review successfully, invalid like action', async () => {
+      const review = await createReview({
+        reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+        stars: 3,
+        user: user.id,
+        book: book.id,
+      });
+      // eslint-disable-next-line no-underscore-dangle
+      const response = await putRequest(`/reviews/${review._id}/likes`, token)
+        .send({ action: 'likee' })
+        .expect(400);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      // eslint-disable-next-line quotes
+      expect(resp_data.error).to.equal(`Invalid action`);
     });
     it('should not get book successfully, no such review ID', async () => {
       const objID = new ObjectID();
