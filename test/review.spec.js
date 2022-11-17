@@ -123,7 +123,9 @@ describe('Review related tests', () => {
       expect(resp_data.data.likes).to.be.an('array');
       expect(resp_data.data.likes).to.include(user.id);
     });
-    it('should unlike book review successfully', async () => {
+    // eslint-disable-next-line func-names
+    it('should unlike book review successfully', async function () {
+      this.timeout(10000);
       const review = await createReview({
         reviewText: `${Date.now()}_Devworks  Bootcamp review`,
         stars: 3,
