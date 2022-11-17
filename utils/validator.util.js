@@ -133,6 +133,12 @@ class Validator {
       }, 'ObjectID Validation')),
     }),
   });
+
+  static putReviewLikesValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      action: Joi.string().valid('like', 'unlike'),
+    }),
+  });
 }
 
 module.exports = Validator;

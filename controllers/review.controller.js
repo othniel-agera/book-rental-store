@@ -98,9 +98,15 @@ class ReviewController {
    * @access Private
    */
   getReviews = asyncHandler(async (req, res) => {
-    const page = parseInt(req.query.page, 10);
-    const limit = parseInt(req.query.limit, 10);
-    const result = await advancedResults(Review, req.query, { page, limit });
+    const { query, params } = req;
+    const page = parseInt(query.page, 10);
+    const limit = parseInt(query.limit, 10);
+    let localQuery = { ...query };
+
+    if (params.bookId) {
+      localQuery = { ...localQuery, book: params.bookId };
+    }
+    const result = await advancedResults(Review, localQuery, { page, limit });
 
     res.status(200).json({
       success: true,

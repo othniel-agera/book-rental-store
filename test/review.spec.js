@@ -313,7 +313,7 @@ describe('Review related tests', () => {
       // eslint-disable-next-line no-underscore-dangle
       const response = await putRequest(`/reviews/${review._id}/likes`, token)
         .send({ action: 'likee' })
-        .expect(400);
+        .expect(422);
 
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
@@ -323,7 +323,7 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`Invalid action`);
+      expect(resp_data.error).to.equal(`ValidationError: "action" must be one of [like, unlike]`);
     });
     it('should not get book successfully, no such review ID', async () => {
       const objID = new ObjectID();
