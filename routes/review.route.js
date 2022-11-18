@@ -4,6 +4,7 @@ const {
   postReview, putReview, putReviewLike, getReviews, getReview, getReviewLikes, deleteReview,
 } = require('../controllers/review.controller');
 const {
+  getReviewValidator,
   postReviewValidator,
   putReviewLikesValidator,
   putReviewValidator,
@@ -11,7 +12,7 @@ const {
 
 const router = Router({ mergeParams: true });
 
-router.route('/').post(authenticate, postReviewValidator, postReview).get(authenticate, getReviews);
+router.route('/').post(authenticate, postReviewValidator, postReview).get(authenticate, getReviewValidator, getReviews);
 router.route('/:id/likes').put(authenticate, putReviewLikesValidator, putReviewLike).get(authenticate, getReviewLikes);
 router.route('/:id').put(authenticate, putReviewValidator, putReview).get(authenticate, getReview).delete(authenticate, deleteReview);
 

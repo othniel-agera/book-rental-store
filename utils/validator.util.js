@@ -39,6 +39,15 @@ class Validator {
   });
 
   // Validators for book routes
+  static getBookValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number(),
+      limit: Joi.number(),
+      select: Joi.string(),
+      sort: Joi.string(),
+    }),
+  });
+
   static postBookValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
       title: Joi.string().required(),
@@ -96,6 +105,15 @@ class Validator {
   });
 
   // Validators for review routes
+  static getReviewValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number(),
+      limit: Joi.number(),
+      select: Joi.string(),
+      sort: Joi.string(),
+    }),
+  });
+
   static postReviewValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
       reviewText: Joi.string().required(),
