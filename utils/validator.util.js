@@ -100,7 +100,7 @@ class Validator {
     [Segments.BODY]: Joi.object().keys({
       reviewText: Joi.string().required(),
       stars: Joi.number().max(5).min(1),
-      user: Joi.string().required().custom((value, helper) => {
+      reviewer: Joi.string().required().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
         return value;
       }, 'ObjectID Validation'),
@@ -108,10 +108,6 @@ class Validator {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
         return value;
       }, 'ObjectID Validation'),
-      likes: Joi.array().items(Joi.string().required().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
-        return value;
-      }, 'ObjectID Validation')),
     }),
   });
 
@@ -119,7 +115,7 @@ class Validator {
     [Segments.BODY]: Joi.object().keys({
       reviewText: Joi.string(),
       stars: Joi.number().max(5).min(1),
-      user: Joi.string().custom((value, helper) => {
+      reviewer: Joi.string().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
         return value;
       }, 'ObjectID Validation'),
@@ -127,10 +123,6 @@ class Validator {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
         return value;
       }, 'ObjectID Validation'),
-      likes: Joi.array().items(Joi.string().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
-        return value;
-      }, 'ObjectID Validation')),
     }),
   });
 

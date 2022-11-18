@@ -80,10 +80,22 @@ class BookController {
    * @access Private
    */
   getBooks = asyncHandler(async (req, res) => {
-    const page = parseInt(req.query.page, 10);
-    const limit = parseInt(req.query.limit, 10);
-    const result = await advancedResults(Book, req.query, { page, limit, populate: 'authorInformation' });
-    console.log(req.query);
+    const { query, params } = req;
+    const {
+      page, limit, select, sort, ...filter
+    } = query;
+    let localFilter = { ...filter };
+    if (params.bookId) {
+      localFilter = { ...filter, book: params.bookId };
+    }
+    const result = await advancedResults(Book, localFilter, {
+      page: page || parseInt(page, 10),
+      limit: limit || parseInt(limit, 10),
+      select,
+      sort,
+      populate: 'authorInformation',
+    });
+
     res.status(200).json({
       success: true,
       ...result,

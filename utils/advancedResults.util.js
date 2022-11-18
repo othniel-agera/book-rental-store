@@ -1,23 +1,19 @@
 const advancedResults = async (
   model,
-  reqQuery,
+  filter,
   options,
 ) => {
   const {
     limit = 1,
     page = 25,
     populate,
+    select,
+    sort,
   } = options;
   let query;
-  const localReqQuery = { ...reqQuery };
-  // Fields to exclude
-  const removeFields = ['select', 'sort', 'page', 'limit'];
-
-  // Loop over removeFields and delete them from reqQuery
-  removeFields.forEach((param) => delete localReqQuery[param]);
 
   // Create query string
-  let queryStr = JSON.stringify(localReqQuery);
+  let queryStr = JSON.stringify(filter);
 
   // Create operators ( $gt, $gte, etc)
   queryStr = queryStr.replace(
@@ -29,22 +25,20 @@ const advancedResults = async (
   query = model.find(JSON.parse(queryStr));
 
   // Select fields
-  if (reqQuery.select) {
-    const fields = reqQuery.select.split(',').join(' ');
+  if (select) {
+    const fields = select.split(',').join(' ');
     query = query.select(fields);
   }
 
   // Sort
-  if (reqQuery.sort) {
-    const sortBy = reqQuery.sort.split(',').join(' ');
+  if (sort) {
+    const sortBy = sort.split(',').join(' ');
     query = query.sort(sortBy);
   } else {
     query = query.sort('-createdAt');
   }
 
   // Pagination
-  // const page = parseInt(reqQuery.page, 10) || 1;
-  // const limit = parseInt(reqQuery.limit, 10) || 25;
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
   const total = await model.countDocuments();
