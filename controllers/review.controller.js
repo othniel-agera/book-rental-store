@@ -19,7 +19,7 @@ class ReviewController {
     // Add user to req.body
     req.body.authorInformation = req.user;
     const rawData = req.body;
-    await this.reviewLib.checkResourceInDB({ user: rawData.user, book: rawData.book });
+    await this.reviewLib.checkUserAndBookInDB({ user: rawData.user, book: rawData.book });
     const review = await this.reviewLib.createReview(rawData);
     return res.status(201).json({
       success: true,
@@ -34,14 +34,14 @@ class ReviewController {
    */
   putReview = asyncHandler(async (req, res, next) => {
     // Add user to req.body
-    const { id } = req.params;
-    req.body.authorInformation = req.user;
-    const rawData = req.body;
-
-    let review = await this.reviewLib.fetchReview({ _id: id });
+    const { params, body, user } = req;
+    const { id } = params;
+    body.authorInformation = user;
+    const rawData = body;
+    let review = await this.reviewLib.fetchReview({ _id: id, user: body.authorInformation.id });
     if (!review) {
       return next(
-        new ErrorResponse(`Review with id: ${id} does not exist on the database`, 404),
+        new ErrorResponse(`Review with id: ${id} does not exist.`, 404),
       );
     }
 
@@ -70,22 +70,14 @@ class ReviewController {
     let review = await this.reviewLib.fetchReview({ _id: id });
     if (!review) {
       return next(
-        new ErrorResponse(`Review with id: ${id} does not exist on the database`, 404),
+        new ErrorResponse(`Review with id: ${id} does not exist.`, 404),
       );
     }
-    let actionObj;
-    if (action === 'like') {
-      actionObj = {
-        $addToSet: { likes: ObjectID(user.id) },
-      };
-    }
-    if (action === 'unlike') {
-      actionObj = {
-        $pull: { likes: ObjectID(user.id) },
-      };
-    }
-
-    review = await this.reviewLib.updateReview(id, actionObj);
+    const actionObj = { like: '$addToSet', unlike: '$pull' };
+    const updateData = {
+      [actionObj[action]]: { likes: ObjectID(user.id) },
+    };
+    review = await this.reviewLib.updateReview(id, updateData);
     return res.status(202).json({
       success: true,
       data: review,
@@ -98,9 +90,20 @@ class ReviewController {
    * @access Private
    */
   getReviews = asyncHandler(async (req, res) => {
-    const page = parseInt(req.query.page, 10);
-    const limit = parseInt(req.query.limit, 10);
-    const result = await advancedResults(Review, req.query, { page, limit });
+    const { query, params } = req;
+    const {
+      page, limit, select, sort, ...filter
+    } = query;
+    let localFilter = { ...filter };
+    if (params.bookId) {
+      localFilter = { ...filter, book: params.bookId };
+    }
+    const result = await advancedResults(Review, localFilter, {
+      page: page || parseInt(page, 10),
+      limit: limit || parseInt(limit, 10),
+      select,
+      sort,
+    });
 
     res.status(200).json({
       success: true,
@@ -121,7 +124,7 @@ class ReviewController {
     const review = await this.reviewLib.fetchReview({ _id: id });
     if (!review) {
       return next(
-        new ErrorResponse(`Review with id: ${id} does not exist on the database`, 404),
+        new ErrorResponse(`Review with id: ${id} does not exist.`, 404),
       );
     }
     return res.status(200).json({
@@ -139,16 +142,15 @@ class ReviewController {
     // Add user to req.body
     const { id } = req.params;
     req.body.authorInformation = req.user;
-
     const review = await this.reviewLib.fetchReview({ _id: id }, { populate: 'likes', select: 'likes' });
     if (!review) {
       return next(
-        new ErrorResponse(`Review with id: ${id} does not exist on the database`, 404),
+        new ErrorResponse(`Review with id: ${id} does not exist.`, 404),
       );
     }
     return res.status(200).json({
       success: true,
-      data: review.toObject({ virtuals: true }),
+      data: review.likes,
     });
   });
 
@@ -159,14 +161,15 @@ class ReviewController {
    */
   deleteReview = asyncHandler(async (req, res, next) => {
     // Add user to req.body
-    const { id } = req.params;
-    req.body.authorInformation = req.user;
-    const rawData = req.body;
+    const { params, body, user } = req;
+    const { id } = params;
+    body.authorInformation = user;
+    const rawData = body;
 
-    let review = await this.reviewLib.fetchReview({ _id: id });
+    let review = await this.reviewLib.fetchReview({ _id: id, user: body.authorInformation.id });
     if (!review) {
       return next(
-        new ErrorResponse(`Review with id: ${id} does not exist on the database`, 404),
+        new ErrorResponse(`Review with id: ${id} does not exist.`, 404),
       );
     }
 

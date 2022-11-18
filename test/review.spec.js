@@ -56,7 +56,7 @@ describe('Review related tests', () => {
           {
             reviewText: `${Date.now()}_Devworks  Bootcamp review`,
             stars: 3,
-            user: user.id,
+            reviewer: user.id,
             book: book.id,
           },
         )
@@ -77,7 +77,7 @@ describe('Review related tests', () => {
       const review = await createReview({
         reviewText: `${Date.now()}_Devworks  Bootcamp review`,
         stars: 3,
-        user: user.id,
+        reviewer: user.id,
         book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
@@ -101,7 +101,7 @@ describe('Review related tests', () => {
       const review = await createReview({
         reviewText: `${Date.now()}_Devworks  Bootcamp review`,
         stars: 3,
-        user: user.id,
+        reviewer: user.id,
         book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
@@ -123,11 +123,13 @@ describe('Review related tests', () => {
       expect(resp_data.data.likes).to.be.an('array');
       expect(resp_data.data.likes).to.include(user.id);
     });
-    it('should unlike book review successfully', async () => {
+    // eslint-disable-next-line func-names
+    it('should unlike book review successfully', async function () {
+      this.timeout(10000);
       const review = await createReview({
         reviewText: `${Date.now()}_Devworks  Bootcamp review`,
         stars: 3,
-        user: user.id,
+        reviewer: user.id,
         book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
@@ -171,7 +173,7 @@ describe('Review related tests', () => {
       const review = await createReview({
         reviewText: `${Date.now()}_Devworks  Bootcamp review`,
         stars: 3,
-        user: user.id,
+        reviewer: user.id,
         book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
@@ -191,7 +193,7 @@ describe('Review related tests', () => {
       const review = await createReview({
         reviewText: `${Date.now()}_Devworks  Bootcamp review`,
         stars: 3,
-        user: user.id,
+        reviewer: user.id,
         book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
@@ -210,7 +212,7 @@ describe('Review related tests', () => {
       const response = await postRequest('/reviews', token)
         .send({
           stars: 3,
-          user: user.id,
+          reviewer: user.id,
           book: book.id,
         })
         .expect(422);
@@ -231,7 +233,7 @@ describe('Review related tests', () => {
         .send({
           reviewText: `${Date.now()}_Devworks  Bootcamp review`,
           stars: 3,
-          user: user.id,
+          reviewer: user.id,
           book: objID,
         })
         .expect(422);
@@ -251,7 +253,7 @@ describe('Review related tests', () => {
         .send({
           reviewText: `${Date.now()}_Devworks  Bootcamp review`,
           stars: 3,
-          user: user.id,
+          reviewer: user.id,
           book: book.id,
         })
         .expect(404);
@@ -272,7 +274,7 @@ describe('Review related tests', () => {
         .send({
           reviewText: `${Date.now()}_Devworks  Bootcamp review`,
           stars: 3,
-          user: user.id,
+          reviewer: user.id,
           book: book.id,
         })
         .expect(404);
@@ -285,7 +287,7 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`Review with id: ${objID} does not exist on the database`);
+      expect(resp_data.error).to.equal(`Review with id: ${objID} does not exist.`);
     });
     it('should not like book review successfully, no such review ID', async () => {
       const objID = new ObjectID();
@@ -301,19 +303,19 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`Review with id: ${objID} does not exist on the database`);
+      expect(resp_data.error).to.equal(`Review with id: ${objID} does not exist.`);
     });
     it('should not like book review successfully, invalid like action', async () => {
       const review = await createReview({
         reviewText: `${Date.now()}_Devworks  Bootcamp review`,
         stars: 3,
-        user: user.id,
+        reviewer: user.id,
         book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
       const response = await putRequest(`/reviews/${review._id}/likes`, token)
         .send({ action: 'likee' })
-        .expect(400);
+        .expect(422);
 
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
@@ -323,7 +325,7 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`Invalid action`);
+      expect(resp_data.error).to.equal(`ValidationError: "action" must be one of [like, unlike]`);
     });
     it('should not get book successfully, no such review ID', async () => {
       const objID = new ObjectID();
@@ -338,7 +340,7 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.contain(`Review with id: ${objID} does not exist on the database`);
+      expect(resp_data.error).to.contain(`Review with id: ${objID} does not exist.`);
     });
     it('should not delete book successfully, no such review ID', async () => {
       const objID = new ObjectID();
@@ -353,7 +355,7 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.contain(`Review with id: ${objID} does not exist on the database`);
+      expect(resp_data.error).to.contain(`Review with id: ${objID} does not exist.`);
     });
   });
   // eslint-disable-next-line func-names

@@ -14,7 +14,7 @@ const ReviewSchema = new Schema(
       min: [1, 'It must be at least 1 star'],
       max: [5, 'It must not be more than 5 stars'],
     },
-    user: {
+    reviewer: {
       type: Schema.Types.ObjectId,
       ref: 'user',
       required: true,
