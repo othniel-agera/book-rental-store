@@ -3,9 +3,11 @@ const express = require('express');
 const router = express.Router();
 const userRoute = require('./user.route');
 const bookRoute = require('./book.route');
+const reviewRoute = require('./review.route');
 
 router.use('/auth', userRoute);
 router.use('/books', bookRoute);
+router.use('/reviews', reviewRoute);
 
 router.get('/', (req, res) => {
   res.status(200).send({

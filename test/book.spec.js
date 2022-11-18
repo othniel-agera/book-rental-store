@@ -155,8 +155,18 @@ describe('Book related tests', () => {
           currency: 'NGN',
         },
       });
-      await getRequest('/books/mine', token)
-        .expect(302);
+      const response = await getRequest('/books/mine', token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('count');
+      expect(resp_data).to.have.property('pagination');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.accessToken).to.not.equal(true);
+      expect(resp_data.data).to.be.an('array');
     });
     it('should get a specific book successfully', async () => {
       const book = await createBook({
@@ -234,7 +244,7 @@ describe('Book related tests', () => {
       });
       const response = await postRequest('/books', token)
         .send({
-          title: 'Devworks  Bootcamp',
+          title,
           description: 'Devworks is a full stack JavaScript Bootcamp located in the heart of Boston that focuses on the technologies you need to get a high paying job as a web developer',
           subject: 'technology',
           authorInformation: user.id,
@@ -314,7 +324,7 @@ describe('Book related tests', () => {
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.equal(`Resource not found.`);
     });
-    it('should not update book successfully, no such user ID', async () => {
+    it('should not update book successfully, no such book ID', async () => {
       const response = await putRequest('/books/636cda0b011883107d392958', token)
         .send({
           title: `${Date.now()}_Devworks  Bootcamp`,
@@ -342,7 +352,7 @@ describe('Book related tests', () => {
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.equal(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
     });
-    it('should not update book successfully, no such user ID', async () => {
+    it('should not update book successfully, no such book ID', async () => {
       const response = await putRequest('/books/636cda0b011883107d392958/add-instock', token)
         .send({ title: `${Date.now()}_Devworks  Bootcamp` })
         .expect(422);
@@ -357,7 +367,7 @@ describe('Book related tests', () => {
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.contain(`ValidationError`);
     });
-    it('should not get book successfully, no such user ID', async () => {
+    it('should not get book successfully, no such book ID', async () => {
       const response = await getRequest('/books/636cda0b011883107d392958', token)
         .expect(404);
 
@@ -371,7 +381,7 @@ describe('Book related tests', () => {
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.contain(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
     });
-    it('should not delete book successfully, no such user ID', async () => {
+    it('should not delete book successfully, no such book ID', async () => {
       const response = await deleteRequest('/books/636cda0b011883107d392958', token)
         .expect(404);
 

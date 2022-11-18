@@ -1,6 +1,8 @@
+const Book = require('../models/book.model');
 const BookLib = require('../lib/book.lib');
 const asyncHandler = require('../middlewares/async.middleware');
 const ErrorResponse = require('../utils/errorResponse.util');
+const advancedResults = require('../utils/advancedResults.util');
 
 class BookController {
   constructor() {
@@ -78,7 +80,26 @@ class BookController {
    * @access Private
    */
   getBooks = asyncHandler(async (req, res) => {
-    res.status(200).json(res.advancedResults);
+    const { query, params } = req;
+    const {
+      page, limit, select, sort, ...filter
+    } = query;
+    let localFilter = { ...filter };
+    if (params.bookId) {
+      localFilter = { ...filter, book: params.bookId };
+    }
+    const result = await advancedResults(Book, localFilter, {
+      page: page || parseInt(page, 10),
+      limit: limit || parseInt(limit, 10),
+      select,
+      sort,
+      populate: 'authorInformation',
+    });
+
+    res.status(200).json({
+      success: true,
+      ...result,
+    });
   });
 
   /**
@@ -88,8 +109,18 @@ class BookController {
    */
   getMyBooks = asyncHandler(async (req, res) => {
     const authorInformation = req.user;
-    // eslint-disable-next-line no-underscore-dangle
-    return res.redirect(`${process.env.BASE_URL}/books?authorInformation=${authorInformation.id}`);
+    const page = parseInt(req.query.page, 10);
+    const limit = parseInt(req.query.limit, 10);
+    const result = await advancedResults(
+      Book,
+      { ...req.query, authorInformation: authorInformation.id },
+      { page, limit },
+    );
+
+    res.status(200).json({
+      success: true,
+      ...result,
+    });
   });
 
   /**

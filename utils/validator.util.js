@@ -39,6 +39,15 @@ class Validator {
   });
 
   // Validators for book routes
+  static getBookValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number(),
+      limit: Joi.number(),
+      select: Joi.string(),
+      sort: Joi.string(),
+    }),
+  });
+
   static postBookValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
       title: Joi.string().required(),
@@ -92,6 +101,52 @@ class Validator {
   static putInStockBookValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
       inStock: Joi.number().positive(),
+    }),
+  });
+
+  // Validators for review routes
+  static getReviewValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number(),
+      limit: Joi.number(),
+      select: Joi.string(),
+      sort: Joi.string(),
+    }),
+  });
+
+  static postReviewValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      reviewText: Joi.string().required(),
+      stars: Joi.number().max(5).min(1),
+      reviewer: Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
+        return value;
+      }, 'ObjectID Validation'),
+      book: Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
+        return value;
+      }, 'ObjectID Validation'),
+    }),
+  });
+
+  static putReviewValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      reviewText: Joi.string(),
+      stars: Joi.number().max(5).min(1),
+      reviewer: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
+        return value;
+      }, 'ObjectID Validation'),
+      book: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
+        return value;
+      }, 'ObjectID Validation'),
+    }),
+  });
+
+  static putReviewLikesValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      action: Joi.string().valid('like', 'unlike'),
     }),
   });
 }
