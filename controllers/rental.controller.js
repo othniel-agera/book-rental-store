@@ -1,6 +1,6 @@
-const { ObjectID } = require('mongodb');
 const Rental = require('../models/rental.model');
 const RentalLib = require('../lib/rental.lib');
+const BookLib = require('../lib/book.lib');
 const asyncHandler = require('../middlewares/async.middleware');
 const ErrorResponse = require('../utils/errorResponse.util');
 const advancedResults = require('../utils/advancedResults.util');
@@ -8,6 +8,7 @@ const advancedResults = require('../utils/advancedResults.util');
 class RentalController {
   constructor() {
     this.rentalLib = new RentalLib();
+    this.bookLib = new BookLib();
   }
 
   /**
@@ -15,7 +16,7 @@ class RentalController {
    * @route POST /api/v1/rentals
    * @access Private
    */
-  postRental = asyncHandler(async (req, res) => {
+  checkOut = asyncHandler(async (req, res) => {
     // Add user to req.body
     req.body.authorInformation = req.user;
     const rawData = req.body;
@@ -54,38 +55,22 @@ class RentalController {
 
   /**
    * @desc Edit rental to add a like
-   * @route PUT /api/v1/rentals/:id/likes
+   * @route PUT /api/v1/rentals/:id/checkin
    * @access Private
    */
-  putRentalLike = asyncHandler(async (req, res, next) => {
+  checkIn = asyncHandler(async (req, res, next) => {
     // Add user to req.body
-    const { user, params, body } = req;
+    const { user, params } = req;
     const { id } = params;
-    const { action } = body;
 
-    if (!['like', 'unlike'].includes(action)) {
-      return next(new ErrorResponse('Invalid action', 400));
-    }
-
-    let rental = await this.rentalLib.fetchRental({ _id: id });
+    let rental = await this.rentalLib.fetchRental({ _id: id, user: user.id });
     if (!rental) {
       return next(
         new ErrorResponse(`Rental with id: ${id} does not exist on the database`, 404),
       );
     }
-    let actionObj;
-    if (action === 'like') {
-      actionObj = {
-        $addToSet: { likes: ObjectID(user.id) },
-      };
-    }
-    if (action === 'unlike') {
-      actionObj = {
-        $pull: { likes: ObjectID(user.id) },
-      };
-    }
 
-    rental = await this.rentalLib.updateRental(id, actionObj);
+    rental = await this.rentalLib.updateRental(id, { isReturned: true });
     return res.status(202).json({
       success: true,
       data: rental,
@@ -98,13 +83,48 @@ class RentalController {
    * @access Private
    */
   getRentals = asyncHandler(async (req, res) => {
-    const page = parseInt(req.query.page, 10);
-    const limit = parseInt(req.query.limit, 10);
-    const result = await advancedResults(Rental, req.query, { page, limit });
+    const { query, params } = req;
+    const {
+      page, limit, select, sort, ...filter
+    } = query;
+    let localFilter = { ...filter };
+    if (params.bookId) {
+      localFilter = { ...filter, book: params.bookId };
+    }
+    const result = await advancedResults(Rental, localFilter, {
+      page: page || parseInt(page, 10),
+      limit: limit || parseInt(limit, 10),
+      select,
+      sort,
+    });
 
     res.status(200).json({
       success: true,
       ...result,
+    });
+  });
+
+  /**
+   * @desc Get rental likes
+   * @route GET /api/v1/rentals/books/:userId
+   * @access Private
+   */
+  getBooksRented = asyncHandler(async (req, res) => {
+    // Add user to req.body
+    const { userId } = req.params;
+    req.body.authorInformation = req.user;
+
+    const rentals = await advancedResults(Rental, { user: userId }, {
+      page: 1,
+      distinct: 'book',
+      populate: 'book',
+    });
+
+    const books = await this.bookLib.fetchBooks({ _id: { $in: rentals.data } });
+
+    return res.status(200).json({
+      success: true,
+      data: books,
     });
   });
 
@@ -127,28 +147,6 @@ class RentalController {
     return res.status(200).json({
       success: true,
       data: rental,
-    });
-  });
-
-  /**
-   * @desc Get rental likes
-   * @route GET /api/v1/rentals/:id/likes
-   * @access Private
-   */
-  getRentalLikes = asyncHandler(async (req, res, next) => {
-    // Add user to req.body
-    const { id } = req.params;
-    req.body.authorInformation = req.user;
-
-    const rental = await this.rentalLib.fetchRental({ _id: id }, { populate: 'likes', select: 'likes' });
-    if (!rental) {
-      return next(
-        new ErrorResponse(`Rental with id: ${id} does not exist on the database`, 404),
-      );
-    }
-    return res.status(200).json({
-      success: true,
-      data: rental.toObject({ virtuals: true }),
     });
   });
 

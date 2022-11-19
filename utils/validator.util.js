@@ -41,8 +41,8 @@ class Validator {
   // Validators for book routes
   static getBookValidator = celebrate({
     [Segments.QUERY]: Joi.object().keys({
-      page: Joi.number(),
-      limit: Joi.number(),
+      page: Joi.number().positive().min(1).default(25),
+      limit: Joi.number().positive().min(1).default(1),
       select: Joi.string(),
       sort: Joi.string(),
     }),
@@ -107,8 +107,8 @@ class Validator {
   // Validators for review routes
   static getReviewValidator = celebrate({
     [Segments.QUERY]: Joi.object().keys({
-      page: Joi.number(),
-      limit: Joi.number(),
+      page: Joi.number().positive().min(1).default(25),
+      limit: Joi.number().positive().min(1).default(1),
       select: Joi.string(),
       sort: Joi.string(),
     }),
@@ -151,7 +151,16 @@ class Validator {
   });
 
   // Validators for rental routes
-  static postRentalValidator = celebrate({
+  static getRentalValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number().positive().min(1).default(25),
+      limit: Joi.number().positive().min(1).default(1),
+      select: Joi.string(),
+      sort: Joi.string(),
+    }),
+  });
+
+  static checkOutValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
       user: Joi.string().required().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
