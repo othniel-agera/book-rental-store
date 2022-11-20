@@ -50,12 +50,12 @@ describe('Rental related tests', () => {
     });
   });
   describe('Positive Tests', () => {
-    it('should rental a book successfully', async () => {
-      const response = await postRequest('/rentals', token)
+    it('should checkout a book successfully', async () => {
+      const response = await postRequest('/rentals/checkout', token)
         .send(
           {
-            rentalText: `${Date.now()}_Devworks  Bootcamp rental`,
-            stars: 3,
+            dueDate: new Date('11/30/2022'),
+            quantity: 1,
             user: user.id,
             book: book.id,
           },
@@ -67,7 +67,6 @@ describe('Rental related tests', () => {
       expect(resp_data).to.have.property('success');
       expect(resp_data).to.have.property('data');
       expect(resp_data.success).to.be.an('boolean');
-      expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('object');
       expect(resp_data.data).to.have.property('_id');
       expect(resp_data.data).to.have.property('createdAt');
@@ -75,14 +74,14 @@ describe('Rental related tests', () => {
     });
     it('should edit a book rental successfully', async () => {
       const rental = await createRental({
-        rentalText: `${Date.now()}_Devworks  Bootcamp rental`,
-        stars: 3,
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
         user: user.id,
         book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
       const response = await putRequest(`/rentals/${rental._id}`, token)
-        .send({ rentalText: `${Date.now()}_Devworks  Bootcamp rental` })
+        .send({ quantity: 3 })
         .expect(202);
 
       const resp_data = response.body;
@@ -90,23 +89,22 @@ describe('Rental related tests', () => {
       expect(resp_data).to.have.property('success');
       expect(resp_data).to.have.property('data');
       expect(resp_data.success).to.be.an('boolean');
-      expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('object');
       expect(resp_data.data).to.have.property('_id');
       expect(resp_data.data).to.have.property('createdAt');
       expect(resp_data.data).to.have.property('updatedAt');
       expect(resp_data.data.createdAt).to.not.equal(resp_data.data.updatedAt);
     });
-    it('should like book rental successfully', async () => {
+    it('should checkin a book successfully', async () => {
       const rental = await createRental({
-        rentalText: `${Date.now()}_Devworks  Bootcamp rental`,
-        stars: 3,
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
         user: user.id,
         book: book.id,
       });
       // eslint-disable-next-line no-underscore-dangle
-      const response = await putRequest(`/rentals/${rental._id}/likes`, token)
-        .send({ action: 'like' })
+      const response = await putRequest(`/rentals/${rental._id}/checkin`, token)
+        .send()
         .expect(202);
 
       const resp_data = response.body;
@@ -114,44 +112,13 @@ describe('Rental related tests', () => {
       expect(resp_data).to.have.property('success');
       expect(resp_data).to.have.property('data');
       expect(resp_data.success).to.be.an('boolean');
-      expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('object');
       expect(resp_data.data).to.have.property('_id');
       expect(resp_data.data).to.have.property('createdAt');
       expect(resp_data.data).to.have.property('updatedAt');
       expect(resp_data.data.createdAt).to.not.equal(resp_data.data.updatedAt);
-      expect(resp_data.data.likes).to.be.an('array');
-      expect(resp_data.data.likes).to.include(user.id);
-    });
-    it('should unlike book rental successfully', async () => {
-      const rental = await createRental({
-        rentalText: `${Date.now()}_Devworks  Bootcamp rental`,
-        stars: 3,
-        user: user.id,
-        book: book.id,
-      });
-      // eslint-disable-next-line no-underscore-dangle
-      await putRequest(`/rentals/${rental._id}/likes`, token)
-        .send({ action: 'like' })
-        .expect(202);
-      // eslint-disable-next-line no-underscore-dangle
-      const response = await putRequest(`/rentals/${rental._id}/likes`, token)
-        .send({ action: 'unlike' })
-        .expect(202);
-
-      const resp_data = response.body;
-      expect(resp_data).to.be.an('object');
-      expect(resp_data).to.have.property('success');
-      expect(resp_data).to.have.property('data');
-      expect(resp_data.success).to.be.an('boolean');
-      expect(resp_data.accessToken).to.not.equal(true);
-      expect(resp_data.data).to.be.an('object');
-      expect(resp_data.data).to.have.property('_id');
-      expect(resp_data.data).to.have.property('createdAt');
-      expect(resp_data.data).to.have.property('updatedAt');
-      expect(resp_data.data.createdAt).to.not.equal(resp_data.data.updatedAt);
-      expect(resp_data.data.likes).to.be.an('array');
-      expect(resp_data.data.likes).to.not.include(user.id);
+      expect(resp_data.data.isReturned).to.be.an('boolean');
+      expect(resp_data.data.isReturned).to.equal(true);
     });
     it('should get all the rentals to a books successfully', async () => {
       const response = await getRequest('/rentals', token)
@@ -160,17 +127,26 @@ describe('Rental related tests', () => {
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
       expect(resp_data).to.have.property('success');
-      expect(resp_data).to.have.property('count');
-      expect(resp_data).to.have.property('pagination');
       expect(resp_data).to.have.property('data');
       expect(resp_data.success).to.be.an('boolean');
-      expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('array');
     });
-    it('should get a specific book rental successfully', async () => {
+    it('should get all books a user rented successfully', async () => {
+      // eslint-disable-next-line no-underscore-dangle
+      const response = await getRequest(`/rentals/books/${user._id}`, token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.data).to.be.an('array');
+    });
+    it('should get a specific rental successfully', async () => {
       const rental = await createRental({
-        rentalText: `${Date.now()}_Devworks  Bootcamp rental`,
-        stars: 3,
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
         user: user.id,
         book: book.id,
       });
@@ -183,14 +159,13 @@ describe('Rental related tests', () => {
       expect(resp_data).to.have.property('success');
       expect(resp_data).to.have.property('data');
       expect(resp_data.success).to.be.an('boolean');
-      expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('object');
       expect(resp_data.data).to.have.property('_id');
     });
     it('should delete a specific rental successfully', async () => {
       const rental = await createRental({
-        rentalText: `${Date.now()}_Devworks  Bootcamp rental`,
-        stars: 3,
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
         user: user.id,
         book: book.id,
       });
@@ -206,10 +181,10 @@ describe('Rental related tests', () => {
     });
   });
   describe('Negative Tests', () => {
-    it('should not rental a book successfully, rentalText is missing', async () => {
-      const response = await postRequest('/rentals', token)
+    it('should not rent a book successfully, dueDate is missing', async () => {
+      const response = await postRequest('/rentals/checkout', token)
         .send({
-          stars: 3,
+          quantity: 1,
           user: user.id,
           book: book.id,
         })
@@ -223,14 +198,14 @@ describe('Rental related tests', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`ValidationError: "rentalText" is required`);
+      expect(resp_data.error).to.equal(`ValidationError: "dueDate" is required`);
     });
-    it('should not rental a book successfully, invalid book ID', async () => {
+    it('should not rent a book successfully, invalid book ID', async () => {
       const objID = new ObjectID();
-      const response = await postRequest('/rentals', token)
+      const response = await postRequest('/rentals/checkout', token)
         .send({
-          rentalText: `${Date.now()}_Devworks  Bootcamp rental`,
-          stars: 3,
+          dueDate: new Date('11/30/2022'),
+          quantity: 1,
           user: user.id,
           book: objID,
         })
@@ -249,8 +224,8 @@ describe('Rental related tests', () => {
     it('should not update a book rental successfully, invalid ID', async () => {
       const response = await putRequest('/rentals/eeeeeee', token)
         .send({
-          rentalText: `${Date.now()}_Devworks  Bootcamp rental`,
-          stars: 3,
+          dueDate: new Date('11/30/2022'),
+          quantity: 1,
           user: user.id,
           book: book.id,
         })
@@ -270,8 +245,8 @@ describe('Rental related tests', () => {
       const objID = new ObjectID();
       const response = await putRequest(`/rentals/${objID}`, token)
         .send({
-          rentalText: `${Date.now()}_Devworks  Bootcamp rental`,
-          stars: 3,
+          dueDate: new Date('11/30/2022'),
+          quantity: 1,
           user: user.id,
           book: book.id,
         })
@@ -286,44 +261,6 @@ describe('Rental related tests', () => {
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.equal(`Rental with id: ${objID} does not exist on the database`);
-    });
-    it('should not like book rental successfully, no such rental ID', async () => {
-      const objID = new ObjectID();
-      const response = await putRequest(`/rentals/${objID}/likes`, token)
-        .send({ action: 'like' })
-        .expect(404);
-
-      const resp_data = response.body;
-      expect(resp_data).to.be.an('object');
-      expect(resp_data).to.have.property('success');
-      expect(resp_data).to.have.property('error');
-      expect(resp_data.success).to.be.an('boolean');
-      expect(resp_data.success).to.equal(false);
-      expect(resp_data.error).to.be.an('string');
-      // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`Rental with id: ${objID} does not exist on the database`);
-    });
-    it('should not like book rental successfully, invalid like action', async () => {
-      const rental = await createRental({
-        rentalText: `${Date.now()}_Devworks  Bootcamp rental`,
-        stars: 3,
-        user: user.id,
-        book: book.id,
-      });
-      // eslint-disable-next-line no-underscore-dangle
-      const response = await putRequest(`/rentals/${rental._id}/likes`, token)
-        .send({ action: 'likee' })
-        .expect(400);
-
-      const resp_data = response.body;
-      expect(resp_data).to.be.an('object');
-      expect(resp_data).to.have.property('success');
-      expect(resp_data).to.have.property('error');
-      expect(resp_data.success).to.be.an('boolean');
-      expect(resp_data.success).to.equal(false);
-      expect(resp_data.error).to.be.an('string');
-      // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`Invalid action`);
     });
     it('should not get book successfully, no such rental ID', async () => {
       const objID = new ObjectID();
