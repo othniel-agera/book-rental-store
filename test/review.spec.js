@@ -56,7 +56,6 @@ describe('Review related tests', () => {
           {
             reviewText: `${Date.now()}_Devworks  Bootcamp review`,
             stars: 3,
-            reviewer: user.id,
             book: book.id,
           },
         )
@@ -162,7 +161,8 @@ describe('Review related tests', () => {
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
       expect(resp_data).to.have.property('success');
-      expect(resp_data).to.have.property('count');
+      expect(resp_data).to.have.property('totalCount');
+      expect(resp_data).to.have.property('countOnPage');
       expect(resp_data).to.have.property('pagination');
       expect(resp_data).to.have.property('data');
       expect(resp_data.success).to.be.an('boolean');
@@ -233,7 +233,6 @@ describe('Review related tests', () => {
         .send({
           reviewText: `${Date.now()}_Devworks  Bootcamp review`,
           stars: 3,
-          reviewer: user.id,
           book: objID,
         })
         .expect(422);
@@ -253,7 +252,6 @@ describe('Review related tests', () => {
         .send({
           reviewText: `${Date.now()}_Devworks  Bootcamp review`,
           stars: 3,
-          reviewer: user.id,
           book: book.id,
         })
         .expect(404);
@@ -274,7 +272,6 @@ describe('Review related tests', () => {
         .send({
           reviewText: `${Date.now()}_Devworks  Bootcamp review`,
           stars: 3,
-          reviewer: user.id,
           book: book.id,
         })
         .expect(404);
