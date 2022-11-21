@@ -68,8 +68,10 @@ const advancedResults = async (
       limit,
     };
   }
+  const totalCount = await model.find({});
   return {
-    count: results.length,
+    totalCount: totalCount.length,
+    countOnPage: results.length,
     pagination,
     data: results,
   };
