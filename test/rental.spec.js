@@ -126,6 +126,23 @@ describe('Rental related tests', () => {
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
       expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('totalCount');
+      expect(resp_data).to.have.property('countOnPage');
+      expect(resp_data).to.have.property('pagination');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.data).to.be.an('array');
+    });
+    it('should get most rented books successfully', async () => {
+      const response = await getRequest('/rentals/books/most', token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('totalCount');
+      expect(resp_data).to.have.property('countOnPage');
+      expect(resp_data).to.have.property('pagination');
       expect(resp_data).to.have.property('data');
       expect(resp_data.success).to.be.an('boolean');
       expect(resp_data.data).to.be.an('array');

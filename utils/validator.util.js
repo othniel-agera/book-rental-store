@@ -190,6 +190,13 @@ class Validator {
     }),
   });
 
+  static getMostRentedValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
+    }),
+  });
+
   static checkOutValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
       book: Joi.string().required().custom((value, helper) => {
