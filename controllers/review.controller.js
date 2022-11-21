@@ -17,7 +17,7 @@ class ReviewController {
    */
   postReview = asyncHandler(async (req, res) => {
     // Add user to req.body
-    req.body.authorInformation = req.user;
+    req.body.reviewer = req.user;
     const rawData = req.body;
     await this.reviewLib.checkUserAndBookInDB({ user: rawData.user, book: rawData.book });
     const review = await this.reviewLib.createReview(rawData);
