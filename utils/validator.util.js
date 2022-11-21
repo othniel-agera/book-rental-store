@@ -118,10 +118,6 @@ class Validator {
     [Segments.BODY]: Joi.object().keys({
       reviewText: Joi.string().required(),
       stars: Joi.number().max(5).min(1),
-      reviewer: Joi.string().required().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
-        return value;
-      }, 'ObjectID Validation'),
       book: Joi.string().required().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
         return value;
@@ -133,10 +129,6 @@ class Validator {
     [Segments.BODY]: Joi.object().keys({
       reviewText: Joi.string(),
       stars: Joi.number().max(5).min(1),
-      reviewer: Joi.string().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
-        return value;
-      }, 'ObjectID Validation'),
       book: Joi.string().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
         return value;
@@ -160,12 +152,17 @@ class Validator {
     }),
   });
 
+  static getBooksRentedValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
+      select: Joi.string(),
+      sort: Joi.string(),
+    }),
+  });
+
   static checkOutValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
-      user: Joi.string().required().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
-        return value;
-      }, 'ObjectID Validation'),
       book: Joi.string().required().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
         return value;
@@ -182,10 +179,6 @@ class Validator {
 
   static putRentalValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
-      user: Joi.string().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
-        return value;
-      }, 'ObjectID Validation'),
       book: Joi.string().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
         return value;

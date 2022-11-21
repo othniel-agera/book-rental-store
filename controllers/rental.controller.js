@@ -1,4 +1,5 @@
 const Rental = require('../models/rental.model');
+const Book = require('../models/book.model');
 const RentalLib = require('../lib/rental.lib');
 const BookLib = require('../lib/book.lib');
 const asyncHandler = require('../middlewares/async.middleware');
@@ -18,7 +19,7 @@ class RentalController {
    */
   checkOut = asyncHandler(async (req, res) => {
     // Add user to req.body
-    req.body.authorInformation = req.user;
+    req.body.user = req.user;
     const rawData = req.body;
     await this.rentalLib.checkResourceInDB({ user: rawData.user, book: rawData.book });
     const rental = await this.rentalLib.createRental(rawData);
@@ -62,11 +63,15 @@ class RentalController {
     // Add user to req.body
     const { user, params } = req;
     const { id } = params;
-
-    let rental = await this.rentalLib.fetchRental({ _id: id, user: user.id });
+    let rental = await this.rentalLib.fetchRental({ _id: id });
     if (!rental) {
       return next(
         new ErrorResponse(`Rental with id: ${id} does not exist on the database`, 404),
+      );
+    }
+    if (rental.user.toString() !== user.id) {
+      return next(
+        new ErrorResponse(`User: ${user.id} does not have authorization to checkout this rental`, 401),
       );
     }
 
@@ -92,8 +97,8 @@ class RentalController {
       localFilter = { ...filter, book: params.bookId };
     }
     const result = await advancedResults(Rental, localFilter, {
-      page: page || parseInt(page, 10),
-      limit: limit || parseInt(limit, 10),
+      page,
+      limit,
       select,
       sort,
     });
@@ -110,21 +115,25 @@ class RentalController {
    * @access Private
    */
   getBooksRented = asyncHandler(async (req, res) => {
-    // Add user to req.body
-    const { userId } = req.params;
-    req.body.authorInformation = req.user;
+    const { query, params } = req;
+    const {
+      page, limit,
+    } = query;
+    const { userId } = params;
 
     const rentals = await advancedResults(Rental, { user: userId }, {
-      page: 1,
       distinct: 'book',
       populate: 'book',
     });
 
-    const books = await this.bookLib.fetchBooks({ _id: { $in: rentals.data } });
+    const results = await advancedResults(Book, { _id: { in: rentals.data } }, {
+      page,
+      limit,
+    });
 
     return res.status(200).json({
       success: true,
-      data: books,
+      ...results,
     });
   });
 
@@ -134,9 +143,7 @@ class RentalController {
    * @access Private
    */
   getRental = asyncHandler(async (req, res, next) => {
-    // Add user to req.body
     const { id } = req.params;
-    req.body.authorInformation = req.user;
 
     const rental = await this.rentalLib.fetchRental({ _id: id });
     if (!rental) {

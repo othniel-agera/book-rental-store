@@ -42,7 +42,7 @@ const advancedResults = async (
   // Pagination
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
-  const total = await model.countDocuments();
+  const total = await model.countDocuments(JSON.parse(queryStr));
   query = query.skip(startIndex).limit(limit);
 
   if (distinct) {
@@ -68,7 +68,7 @@ const advancedResults = async (
       limit,
     };
   }
-  const totalCount = await model.find({});
+  const totalCount = await model.find(JSON.parse(queryStr));
   return {
     totalCount: totalCount.length,
     countOnPage: results.length,
