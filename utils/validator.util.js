@@ -45,6 +45,20 @@ class Validator {
       limit: Joi.number().positive().min(1).default(25),
       select: Joi.string(),
       sort: Joi.string(),
+      title: Joi.string(),
+      description: Joi.string(),
+      subject: Joi.string(),
+      authorInformation: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid author ID');
+        return value;
+      }, 'ObjectID Validation'),
+      'dimension.height': Joi.number().positive(),
+      'dimension.width': Joi.number().positive(),
+      'dimension.unitOfMeasurement': Joi.string(),
+      'pricing.dailyRate': Joi.number().positive(),
+      'pricing.currency': Joi.string(),
+      'quantity.inStock': Joi.number().positive(),
+      'quantity.rentedOut': Joi.number().positive(),
     }),
   });
 
@@ -111,6 +125,12 @@ class Validator {
       limit: Joi.number().positive().min(1).default(25),
       select: Joi.string(),
       sort: Joi.string(),
+      reviewText: Joi.string(),
+      stars: Joi.number().max(5).min(1),
+      book: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
+        return value;
+      }, 'ObjectID Validation'),
     }),
   });
 
@@ -149,6 +169,15 @@ class Validator {
       limit: Joi.number().positive().min(1).default(25),
       select: Joi.string(),
       sort: Joi.string(),
+      book: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
+        return value;
+      }, 'ObjectID Validation'),
+      dueDate: Joi.date(),
+      quantity: Joi.number().positive(),
+      isReturned: Joi.boolean(),
+      'charge.amount': Joi.number().positive().allow(0),
+      'charge.currency': Joi.string(),
     }),
   });
 
