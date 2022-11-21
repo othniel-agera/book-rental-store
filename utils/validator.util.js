@@ -41,8 +41,8 @@ class Validator {
   // Validators for book routes
   static getBookValidator = celebrate({
     [Segments.QUERY]: Joi.object().keys({
-      page: Joi.number().positive().min(1).default(25),
-      limit: Joi.number().positive().min(1).default(1),
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
       select: Joi.string(),
       sort: Joi.string(),
     }),
@@ -107,8 +107,8 @@ class Validator {
   // Validators for review routes
   static getReviewValidator = celebrate({
     [Segments.QUERY]: Joi.object().keys({
-      page: Joi.number().positive().min(1).default(25),
-      limit: Joi.number().positive().min(1).default(1),
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
       select: Joi.string(),
       sort: Joi.string(),
     }),
@@ -153,8 +153,8 @@ class Validator {
   // Validators for rental routes
   static getRentalValidator = celebrate({
     [Segments.QUERY]: Joi.object().keys({
-      page: Joi.number().positive().min(1).default(25),
-      limit: Joi.number().positive().min(1).default(1),
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
       select: Joi.string(),
       sort: Joi.string(),
     }),
