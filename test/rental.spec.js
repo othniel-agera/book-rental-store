@@ -56,7 +56,6 @@ describe('Rental related tests', () => {
           {
             dueDate: new Date('11/30/2022'),
             quantity: 1,
-            user: user.id,
             book: book.id,
           },
         )
@@ -185,7 +184,6 @@ describe('Rental related tests', () => {
       const response = await postRequest('/rentals/checkout', token)
         .send({
           quantity: 1,
-          user: user.id,
           book: book.id,
         })
         .expect(422);
@@ -206,7 +204,6 @@ describe('Rental related tests', () => {
         .send({
           dueDate: new Date('11/30/2022'),
           quantity: 1,
-          user: user.id,
           book: objID,
         })
         .expect(422);
@@ -226,7 +223,6 @@ describe('Rental related tests', () => {
         .send({
           dueDate: new Date('11/30/2022'),
           quantity: 1,
-          user: user.id,
           book: book.id,
         })
         .expect(404);
@@ -247,7 +243,6 @@ describe('Rental related tests', () => {
         .send({
           dueDate: new Date('11/30/2022'),
           quantity: 1,
-          user: user.id,
           book: book.id,
         })
         .expect(404);
