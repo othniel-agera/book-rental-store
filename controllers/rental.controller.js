@@ -85,6 +85,7 @@ class RentalController {
   /**
    * @desc Get rentals
    * @route GET /api/v1/rentals
+   * @route GET /api/v1/books/:bookId/rentals
    * @access Private
    */
   getRentals = asyncHandler(async (req, res) => {

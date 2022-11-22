@@ -8,7 +8,7 @@ const {
   getBooksRentedValidator, getMostRentedValidator, checkOutValidator, putRentalValidator,
 } = require('../utils/validator.util');
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 router.route('/').get(authenticate, getRentalValidator, getRentals);
 router.route('/checkout').post(authenticate, checkOutValidator, checkOut);
