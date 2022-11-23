@@ -27,7 +27,7 @@ const errorHandler = (err, req, res, _next) => {
   if (error?.details?.get('body')?.stack?.includes('ValidationError')) {
     error = new ErrorResponse(error.details.get('body').stack, 422);
   }
-  console.log(error);
+  // console.log(error);
 
   res.status(error.statusCode || 500).json({
     success: false,
