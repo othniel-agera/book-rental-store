@@ -87,6 +87,7 @@ class ReviewController {
   /**
    * @desc Get reviews
    * @route GET /api/v1/reviews
+   * @route GET /api/v1/books/:bookId/reviews
    * @access Private
    */
   getReviews = asyncHandler(async (req, res) => {
@@ -108,6 +109,109 @@ class ReviewController {
     res.status(200).json({
       success: true,
       ...result,
+    });
+  });
+
+  /**
+   * @desc Get books with highest review
+   * @route GET /api/v1/books/reviews/highest
+   * @access Private
+  */
+  getBooksHighestReview = asyncHandler(async (req, res) => {
+    const { query } = req;
+    const {
+      page, limit, lower, upper,
+    } = query;
+
+    // Pagination
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+
+    const groupSortLookup = [
+      {
+        $group: {
+          _id: '$book',
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+      {
+        $lookup: {
+          from: 'books',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'book',
+        },
+      },
+    ];
+    if (lower && upper) {
+      groupSortLookup.unshift({
+        $match: {
+          createdAt: { $lt: new Date(upper), $gt: new Date(lower) },
+        },
+      });
+      /* const resultt = await Review.find(
+        { ...parsedFilter },
+      );
+      console.log(resultt); */
+    }
+    const gslUnwindLimitSkip = [
+      ...groupSortLookup,
+      { $unwind: '$book' },
+      { $skip: startIndex },
+      { $limit: limit },
+    ];
+    const result = await Review.aggregate([
+      {
+        $facet: {
+          totalCount: [
+            ...groupSortLookup,
+            { $count: 'count' },
+          ],
+          countOnPage: [
+            ...gslUnwindLimitSkip,
+            {
+              $count: 'count',
+            },
+          ],
+          mostRentedBooks: [
+            ...gslUnwindLimitSkip,
+          ],
+        },
+      },
+    ]); console.log(result);
+    const total = result[0].totalCount.length ? result[0].totalCount[0].count : 0;
+
+    // Pagination result
+    const pagination = {};
+    if (endIndex < total) {
+      pagination.next = {
+        page: page + 1,
+        limit,
+      };
+    }
+    if (startIndex > 0) {
+      pagination.prev = {
+        page: page - 1,
+        limit,
+      };
+    }
+    let packaged = {
+      totalCount: 0,
+      countOnPage: 0,
+      data: [],
+    };
+    if (result && result.length) {
+      packaged = {
+        totalCount: result[0].totalCount.length ? result[0].totalCount[0].count : 0,
+        countOnPage: result[0].countOnPage.length ? result[0].countOnPage[0].count : 0,
+        data: result[0].mostRentedBooks,
+      };
+    }
+    res.status(200).json({
+      success: true,
+      pagination,
+      ...packaged,
     });
   });
 

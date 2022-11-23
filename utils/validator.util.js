@@ -134,6 +134,15 @@ class Validator {
     }),
   });
 
+  static getBookHighestReviewValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
+      upper: Joi.string(),
+      lower: Joi.string(),
+    }),
+  });
+
   static postReviewValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
       reviewText: Joi.string().required(),
