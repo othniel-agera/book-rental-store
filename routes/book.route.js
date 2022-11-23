@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const reviewsRouter = require('./review.route');
+const rentalsRouter = require('./rental.route');
 const { authenticate } = require('../middlewares/authentication.middleware');
 const {
   postBook, putBook, putInStockBook, getBooks, getBook, deleteBook, getMyBooks,
@@ -14,6 +15,7 @@ const {
 const router = Router();
 
 router.use('/:bookId/reviews', reviewsRouter);
+router.use('/:bookId/rentals', rentalsRouter);
 
 router.route('/mine').get(authenticate, getMyBooks);
 router.route('/').post(authenticate, postBookValidator, postBook).get(authenticate, getBookValidator, getBooks);

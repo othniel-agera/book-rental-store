@@ -4,11 +4,12 @@ const advancedResults = async (
   options,
 ) => {
   const {
-    limit = 1,
-    page = 25,
+    limit = 25,
+    page = 1,
     populate,
     select,
     sort,
+    distinct,
   } = options;
   let query;
 
@@ -41,9 +42,12 @@ const advancedResults = async (
   // Pagination
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
-  const total = await model.countDocuments();
+  const total = await model.countDocuments(JSON.parse(queryStr));
   query = query.skip(startIndex).limit(limit);
 
+  if (distinct) {
+    query = query.distinct(distinct);
+  }
   if (populate) {
     query = query.populate(populate);
   }
@@ -64,8 +68,10 @@ const advancedResults = async (
       limit,
     };
   }
+  const totalCount = await model.find(JSON.parse(queryStr));
   return {
-    count: results.length,
+    totalCount: totalCount.length,
+    countOnPage: results.length,
     pagination,
     data: results,
   };

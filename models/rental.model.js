@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 const { Schema } = mongoose;
 
@@ -36,6 +37,7 @@ const RentalSchema = new Schema(
       },
       currency: {
         type: String,
+        default: 'NGN',
       },
     },
   },
@@ -45,10 +47,11 @@ const RentalSchema = new Schema(
 );
 
 // eslint-disable-next-line func-names
-RentalSchema.pre('save', function (next) {
-  const book = this.model('book');
+RentalSchema.pre('save', async function (next) {
+  const book = await this.model('book').findOne(this.book);
+
   this.charge = {
-    // amount = book.pricing.dailyRate * ,
+    amount: book.pricing.dailyRate * moment(this.dueDate).diff(moment().startOf('day'), 'day') * this.quantity,
     currency: book.pricing.currency,
   };
   next();

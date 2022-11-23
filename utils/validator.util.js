@@ -41,10 +41,24 @@ class Validator {
   // Validators for book routes
   static getBookValidator = celebrate({
     [Segments.QUERY]: Joi.object().keys({
-      page: Joi.number(),
-      limit: Joi.number(),
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
       select: Joi.string(),
       sort: Joi.string(),
+      title: Joi.string(),
+      description: Joi.string(),
+      subject: Joi.string(),
+      authorInformation: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid author ID');
+        return value;
+      }, 'ObjectID Validation'),
+      'dimension.height': Joi.number().positive(),
+      'dimension.width': Joi.number().positive(),
+      'dimension.unitOfMeasurement': Joi.string(),
+      'pricing.dailyRate': Joi.number().positive(),
+      'pricing.currency': Joi.string(),
+      'quantity.inStock': Joi.number().positive(),
+      'quantity.rentedOut': Joi.number().positive(),
     }),
   });
 
@@ -107,10 +121,25 @@ class Validator {
   // Validators for review routes
   static getReviewValidator = celebrate({
     [Segments.QUERY]: Joi.object().keys({
-      page: Joi.number(),
-      limit: Joi.number(),
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
       select: Joi.string(),
       sort: Joi.string(),
+      reviewText: Joi.string(),
+      stars: Joi.number().max(5).min(1),
+      book: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
+        return value;
+      }, 'ObjectID Validation'),
+    }),
+  });
+
+  static getBookHighestReviewValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
+      upper: Joi.string(),
+      lower: Joi.string(),
     }),
   });
 
@@ -118,10 +147,6 @@ class Validator {
     [Segments.BODY]: Joi.object().keys({
       reviewText: Joi.string().required(),
       stars: Joi.number().max(5).min(1),
-      reviewer: Joi.string().required().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
-        return value;
-      }, 'ObjectID Validation'),
       book: Joi.string().required().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
         return value;
@@ -133,10 +158,6 @@ class Validator {
     [Segments.BODY]: Joi.object().keys({
       reviewText: Joi.string(),
       stars: Joi.number().max(5).min(1),
-      reviewer: Joi.string().custom((value, helper) => {
-        if (!isValidObjectId(value)) return helper.message('Please enter a valid user ID');
-        return value;
-      }, 'ObjectID Validation'),
       book: Joi.string().custom((value, helper) => {
         if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
         return value;
@@ -147,6 +168,73 @@ class Validator {
   static putReviewLikesValidator = celebrate({
     [Segments.BODY]: Joi.object().keys({
       action: Joi.string().valid('like', 'unlike'),
+    }),
+  });
+
+  // Validators for rental routes
+  static getRentalValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
+      select: Joi.string(),
+      sort: Joi.string(),
+      book: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
+        return value;
+      }, 'ObjectID Validation'),
+      dueDate: Joi.date(),
+      quantity: Joi.number().positive(),
+      isReturned: Joi.boolean(),
+      'charge.amount': Joi.number().positive().allow(0),
+      'charge.currency': Joi.string(),
+    }),
+  });
+
+  static getBooksRentedValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
+      select: Joi.string(),
+      sort: Joi.string(),
+    }),
+  });
+
+  static getMostRentedValidator = celebrate({
+    [Segments.QUERY]: Joi.object().keys({
+      page: Joi.number().positive().min(1).default(1),
+      limit: Joi.number().positive().min(1).default(25),
+    }),
+  });
+
+  static checkOutValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      book: Joi.string().required().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
+        return value;
+      }, 'ObjectID Validation'),
+      dueDate: Joi.date().required(),
+      quantity: Joi.number().positive(),
+      isReturned: Joi.boolean(),
+      charge: Joi.object({
+        amount: Joi.number().positive().allow(0),
+        currency: Joi.string(),
+      }),
+    }),
+  });
+
+  static putRentalValidator = celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      book: Joi.string().custom((value, helper) => {
+        if (!isValidObjectId(value)) return helper.message('Please enter a valid book ID');
+        return value;
+      }, 'ObjectID Validation'),
+      dueDate: Joi.date(),
+      quantity: Joi.number().positive(),
+      isReturned: Joi.boolean(),
+      charge: Joi.object({
+        amount: Joi.number().positive().allow(0),
+        currency: Joi.string(),
+      }),
     }),
   });
 }

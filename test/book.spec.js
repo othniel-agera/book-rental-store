@@ -132,7 +132,8 @@ describe('Book related tests', () => {
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
       expect(resp_data).to.have.property('success');
-      expect(resp_data).to.have.property('count');
+      expect(resp_data).to.have.property('totalCount');
+      expect(resp_data).to.have.property('countOnPage');
       expect(resp_data).to.have.property('pagination');
       expect(resp_data).to.have.property('data');
       expect(resp_data.success).to.be.an('boolean');
@@ -161,7 +162,8 @@ describe('Book related tests', () => {
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
       expect(resp_data).to.have.property('success');
-      expect(resp_data).to.have.property('count');
+      expect(resp_data).to.have.property('totalCount');
+      expect(resp_data).to.have.property('countOnPage');
       expect(resp_data).to.have.property('pagination');
       expect(resp_data).to.have.property('data');
       expect(resp_data.success).to.be.an('boolean');
