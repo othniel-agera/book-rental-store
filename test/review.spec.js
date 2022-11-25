@@ -169,6 +169,21 @@ describe('Review related tests', () => {
       expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('array');
     });
+    it('should get books with highest reviews successfully', async () => {
+      const response = await getRequest('/reviews/books/highest?upper=2022-11-23T06:11:47.982Z&lower=2022-11-22T18:11:47.982Z', token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('totalCount');
+      expect(resp_data).to.have.property('countOnPage');
+      expect(resp_data).to.have.property('pagination');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.accessToken).to.not.equal(true);
+      expect(resp_data.data).to.be.an('array');
+    });
     it('should get a specific book review successfully', async () => {
       const review = await createReview({
         reviewText: `${Date.now()}_Devworks  Bootcamp review`,
