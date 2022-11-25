@@ -18,15 +18,8 @@ app.use(errorHandler);
 
 const PORT = process.env.NODE_ENV === 'test' ? 2345 : process.env.PORT || 4040;
 
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server started on port #${PORT}`);
-});
-
-// Handle unhandled rejections
-process.on('unhandledRejection', (err) => {
-  console.log(`Error: ${err.message}`);
-  // Close server & exit process
-  server.close(() => process.exit(1));
 });
 
 module.exports = { app };

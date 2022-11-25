@@ -114,7 +114,7 @@ class ReviewController {
 
   /**
    * @desc Get books with highest review
-   * @route GET /api/v1/books/reviews/highest
+   * @route GET /api/v1/reviews/books/highest
    * @access Private
   */
   getBooksHighestReview = asyncHandler(async (req, res) => {
@@ -150,10 +150,6 @@ class ReviewController {
           createdAt: { $lt: new Date(upper), $gt: new Date(lower) },
         },
       });
-      /* const resultt = await Review.find(
-        { ...parsedFilter },
-      );
-      console.log(resultt); */
     }
     const gslUnwindLimitSkip = [
       ...groupSortLookup,
@@ -179,7 +175,7 @@ class ReviewController {
           ],
         },
       },
-    ]); console.log(result);
+    ]);
     const total = result[0].totalCount.length ? result[0].totalCount[0].count : 0;
 
     // Pagination result
