@@ -80,15 +80,11 @@ class BookController {
    * @access Private
    */
   getBooks = asyncHandler(async (req, res) => {
-    const { query, params } = req;
+    const { query } = req;
     const {
       page, limit, select, sort, ...filter
     } = query;
-    let localFilter = { ...filter };
-    if (params.bookId) {
-      localFilter = { ...filter, book: params.bookId };
-    }
-    const result = await advancedResults(Book, localFilter, {
+    const result = await advancedResults(Book, filter, {
       page: page || parseInt(page, 10),
       limit: limit || parseInt(limit, 10),
       select,

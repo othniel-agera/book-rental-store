@@ -154,7 +154,30 @@ describe('Review related tests', () => {
       expect(resp_data.data.likes).to.be.an('array');
       expect(resp_data.data.likes).to.not.include(user.id);
     });
-    it('should get all the reviews to a books successfully', async () => {
+    it('should get all the likes of a book review successfully', async () => {
+      const review = await createReview({
+        reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+        stars: 3,
+        reviewer: user.id,
+        book: book.id,
+      });
+      // eslint-disable-next-line no-underscore-dangle
+      await putRequest(`/reviews/${review._id}/likes`, token)
+        .send({ action: 'like' });
+      // eslint-disable-next-line no-underscore-dangle
+      const response = await getRequest(`/reviews/${review._id}/likes`, token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.accessToken).to.not.equal(true);
+      expect(resp_data.data.likes).to.be.an('array');
+      expect(resp_data.data.numberOfLikes).to.be.an('number');
+    });
+    it('should get all the reviews successfully', async () => {
       const response = await getRequest('/reviews', token)
         .expect(200);
 
@@ -169,8 +192,8 @@ describe('Review related tests', () => {
       expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('array');
     });
-    it('should get books with highest reviews successfully', async () => {
-      const response = await getRequest('/reviews/books/highest?upper=2022-11-23T06:11:47.982Z&lower=2022-11-22T18:11:47.982Z', token)
+    it('should get all the reviews to a book successfully', async () => {
+      const response = await getRequest(`/books/${book.id}/reviews`, token)
         .expect(200);
 
       const resp_data = response.body;
@@ -183,6 +206,35 @@ describe('Review related tests', () => {
       expect(resp_data.success).to.be.an('boolean');
       expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('array');
+    });
+    it('should get books with highest reviews successfully', async () => {
+      await createReview({
+        reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+        stars: 3,
+        reviewer: user.id,
+        book: book.id,
+      });
+      await createReview({
+        reviewText: `${Date.now()}_Devworks  Bootcamp review`,
+        stars: 3,
+        reviewer: user.id,
+        book: book.id,
+      });
+      const response = await getRequest(`/reviews/books/highest?page=2&limit=1&upper=${new Date()}&lower=2022-11-22T18:11:47.982Z`, token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('totalCount');
+      expect(resp_data).to.have.property('countOnPage');
+      expect(resp_data).to.have.property('pagination');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.accessToken).to.not.equal(true);
+      expect(resp_data.data).to.be.an('array');
+      expect(resp_data.pagination).to.have.property('next');
+      expect(resp_data.pagination).to.have.property('prev');
     });
     it('should get a specific book review successfully', async () => {
       const review = await createReview({

@@ -19,7 +19,7 @@ class ReviewController {
     // Add user to req.body
     req.body.reviewer = req.user;
     const rawData = req.body;
-    await this.reviewLib.checkUserAndBookInDB({ user: rawData.user, book: rawData.book });
+    await this.reviewLib.checkUserAndBookInDB({ user: req.user, book: rawData.book });
     const review = await this.reviewLib.createReview(rawData);
     return res.status(201).json({
       success: true,
@@ -242,7 +242,9 @@ class ReviewController {
     // Add user to req.body
     const { id } = req.params;
     req.body.authorInformation = req.user;
-    const review = await this.reviewLib.fetchReview({ _id: id }, { populate: 'likes', select: 'likes' });
+    const review = await this.reviewLib.fetchReview({ _id: id }, { populate: 'likes', select: 'likes, numberOfLikes' });
+    console.log(review);
+    console.log(review.toObject({ virtuals: true }));
     if (!review) {
       return next(
         new ErrorResponse(`Review with id: ${id} does not exist.`, 404),
@@ -250,7 +252,10 @@ class ReviewController {
     }
     return res.status(200).json({
       success: true,
-      data: review.likes,
+      data: {
+        likes: review.likes,
+        numberOfLikes: review.toObject({ virtuals: true }).numberOfLikes,
+      },
     });
   });
 

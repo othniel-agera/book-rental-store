@@ -4,7 +4,9 @@ const {
 const UserLib = require('../lib/user.lib');
 const { hashPassword } = require('../utils/utility.util');
 
-const { createUser, fetchUser, destroyUser } = new UserLib();
+const {
+  createUser, fetchUser, fetchUsers, destroyUser,
+} = new UserLib();
 
 describe('User Registration Test', () => {
   describe('Positive Tests', () => {
@@ -109,6 +111,11 @@ describe('User Registration Test', () => {
       expect(resp_data.data).to.be.an('object');
       expect(resp_data.success).to.equal(true);
     });
+    it('should fetch all the users successfully', async () => {
+      const response = await fetchUsers();
+
+      expect(response).to.be.an('array');
+    });
     // eslint-disable-next-line func-names
     after(async function () {
       this.timeout(10000);
@@ -185,7 +192,6 @@ describe('User Registration Test', () => {
         .expect(401);
 
       const resp_data = response.body;
-      console.log(resp_data);
       expect(resp_data).to.be.an('object');
       expect(resp_data).to.have.property('success');
       expect(resp_data).to.have.property('error');

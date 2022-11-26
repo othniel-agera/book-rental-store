@@ -9,7 +9,7 @@ const { hashPassword } = require('../utils/utility.util');
 
 const { createUser, fetchUser, destroyUser } = new UserLib();
 const { createBook } = new BookLib();
-const { createRental } = new RentalLib();
+const { createRental, fetchRentals } = new RentalLib();
 
 describe('Rental related tests', () => {
   let token;
@@ -119,6 +119,11 @@ describe('Rental related tests', () => {
       expect(resp_data.data.isReturned).to.be.an('boolean');
       expect(resp_data.data.isReturned).to.equal(true);
     });
+    it('should fetch all the rentals successfully', async () => {
+      const response = await fetchRentals();
+
+      expect(response).to.be.an('array');
+    });
     it('should get all the rentals to a books successfully', async () => {
       const response = await getRequest('/rentals', token)
         .expect(200);
@@ -134,7 +139,19 @@ describe('Rental related tests', () => {
       expect(resp_data.data).to.be.an('array');
     });
     it('should get most rented books successfully', async () => {
-      const response = await getRequest('/rentals/books/most', token)
+      await createRental({
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
+        user: user.id,
+        book: book.id,
+      });
+      await createRental({
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
+        user: user.id,
+        book: book.id,
+      });
+      const response = await getRequest('/rentals/books/most?page=2&limit=1', token)
         .expect(200);
 
       const resp_data = response.body;
@@ -146,6 +163,8 @@ describe('Rental related tests', () => {
       expect(resp_data).to.have.property('data');
       expect(resp_data.success).to.be.an('boolean');
       expect(resp_data.data).to.be.an('array');
+      expect(resp_data.pagination).to.have.property('next');
+      expect(resp_data.pagination).to.have.property('prev');
     });
     it('should get all books a user rented successfully', async () => {
       // eslint-disable-next-line no-underscore-dangle

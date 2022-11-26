@@ -40,7 +40,7 @@ class RentalController {
     req.body.authorInformation = req.user;
     const rawData = req.body;
 
-    let rental = await this.rentalLib.fetchRental({ _id: id });
+    let rental = await this.rentalLib.fetchRental({ _id: id }, { select: 'book', populate: 'book' });
     if (!rental) {
       return next(
         new ErrorResponse(`Rental with id: ${id} does not exist on the database`, 404),
@@ -89,15 +89,11 @@ class RentalController {
    * @access Private
    */
   getRentals = asyncHandler(async (req, res) => {
-    const { query, params } = req;
+    const { query } = req;
     const {
       page, limit, select, sort, ...filter
     } = query;
-    let localFilter = { ...filter };
-    if (params.bookId) {
-      localFilter = { ...filter, book: params.bookId };
-    }
-    const result = await advancedResults(Rental, localFilter, {
+    const result = await advancedResults(Rental, filter, {
       page,
       limit,
       select,

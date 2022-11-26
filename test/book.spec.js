@@ -6,7 +6,7 @@ const BookLib = require('../lib/book.lib');
 const { hashPassword } = require('../utils/utility.util');
 
 const { createUser, fetchUser, destroyUser } = new UserLib();
-const { createBook } = new BookLib();
+const { createBook, fetchBooks } = new BookLib();
 
 describe('Book related tests', () => {
   let token;
@@ -125,8 +125,28 @@ describe('Book related tests', () => {
       expect(resp_data.data).to.have.property('quantity');
       expect(resp_data.data.quantity).to.have.property('inStock');
     });
+    it('should fetch all the books successfully', async () => {
+      const response = await fetchBooks();
+
+      expect(response).to.be.an('array');
+    });
     it('should get all the books successfully', async () => {
       const response = await getRequest('/books', token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('totalCount');
+      expect(resp_data).to.have.property('countOnPage');
+      expect(resp_data).to.have.property('pagination');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.accessToken).to.not.equal(true);
+      expect(resp_data.data).to.be.an('array');
+    });
+    it('should get all the books with filters successfully', async () => {
+      const response = await getRequest(`/books?authorInformation=${user.id}`, token)
         .expect(200);
 
       const resp_data = response.body;
@@ -261,7 +281,6 @@ describe('Book related tests', () => {
           },
         })
         .expect(400);
-
       const resp_data = response.body;
       expect(resp_data).to.be.an('object');
       expect(resp_data).to.have.property('success');
@@ -354,7 +373,7 @@ describe('Book related tests', () => {
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.equal(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
     });
-    it('should not update book successfully, no such book ID', async () => {
+    it('should not update book add in stock successfully, no such book ID', async () => {
       const response = await putRequest('/books/636cda0b011883107d392958/add-instock', token)
         .send({ title: `${Date.now()}_Devworks  Bootcamp` })
         .expect(422);
