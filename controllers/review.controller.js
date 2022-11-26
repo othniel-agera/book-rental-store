@@ -63,10 +63,6 @@ class ReviewController {
     const { id } = params;
     const { action } = body;
 
-    if (!['like', 'unlike'].includes(action)) {
-      return next(new ErrorResponse('Invalid action', 400));
-    }
-
     let review = await this.reviewLib.fetchReview({ _id: id });
     if (!review) {
       return next(
@@ -243,8 +239,6 @@ class ReviewController {
     const { id } = req.params;
     req.body.authorInformation = req.user;
     const review = await this.reviewLib.fetchReview({ _id: id }, { populate: 'likes', select: 'likes, numberOfLikes' });
-    console.log(review);
-    console.log(review.toObject({ virtuals: true }));
     if (!review) {
       return next(
         new ErrorResponse(`Review with id: ${id} does not exist.`, 404),

@@ -5,8 +5,12 @@ const UserLib = require('../lib/user.lib');
 const BookLib = require('../lib/book.lib');
 const { hashPassword } = require('../utils/utility.util');
 
-const { createUser, fetchUser, destroyUser } = new UserLib();
-const { createBook, fetchBooks } = new BookLib();
+const {
+  createUser, fetchUser, destroyUser,
+} = new UserLib();
+const {
+  createBook, updateBook, fetchBooks, destroyBook,
+} = new BookLib();
 
 describe('Book related tests', () => {
   let token;
@@ -428,6 +432,12 @@ describe('Book related tests', () => {
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.contain(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
+    });
+    it('should just throw an error, updateBook', async () => {
+      expect(() => updateBook().toThrowError());
+    });
+    it('should just throw an error, destroyBook', async () => {
+      expect(() => destroyBook().toThrowError());
     });
   });
   // eslint-disable-next-line func-names

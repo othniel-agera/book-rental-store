@@ -9,7 +9,9 @@ const { hashPassword } = require('../utils/utility.util');
 
 const { createUser, fetchUser, destroyUser } = new UserLib();
 const { createBook } = new BookLib();
-const { createRental, fetchRentals } = new RentalLib();
+const {
+  createRental, updateRental, fetchRentals, destroyRental,
+} = new RentalLib();
 
 describe('Rental related tests', () => {
   let token;
@@ -371,6 +373,15 @@ describe('Rental related tests', () => {
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.contain(`Rental with id: ${objID} does not exist on the database`);
+    });
+    it('should just throw an error, createRental', async () => {
+      expect(() => createRental().toThrowError());
+    });
+    it('should just throw an error, updateRental', async () => {
+      expect(() => updateRental().toThrowError());
+    });
+    it('should just throw an error, destroyRental', async () => {
+      expect(() => destroyRental().toThrowError());
     });
   });
   // eslint-disable-next-line func-names

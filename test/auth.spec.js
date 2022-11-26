@@ -5,7 +5,7 @@ const UserLib = require('../lib/user.lib');
 const { hashPassword } = require('../utils/utility.util');
 
 const {
-  createUser, fetchUser, fetchUsers, destroyUser,
+  createUser, fetchUser, fetchUsers, destroyUser, updateUser,
 } = new UserLib();
 
 describe('User Registration Test', () => {
@@ -199,6 +199,15 @@ describe('User Registration Test', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       expect(resp_data.error).to.equal('Incorrect email or password');
+    });
+    it('should just throw an error, createUser', async () => {
+      expect(() => createUser().toThrowError());
+    });
+    it('should just throw an error, updateUser', async () => {
+      expect(() => updateUser().toThrowError());
+    });
+    it('should just throw an error, destroyUser', async () => {
+      expect(() => destroyUser().toThrowError());
     });
     after(async () => {
       const userToDelete = await fetchUser({ username: user.username });

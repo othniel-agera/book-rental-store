@@ -9,7 +9,9 @@ const { hashPassword } = require('../utils/utility.util');
 
 const { createUser, fetchUser, destroyUser } = new UserLib();
 const { createBook } = new BookLib();
-const { createReview } = new ReviewLib();
+const {
+  createReview, updateReview, destroyReview, fetchReviews,
+} = new ReviewLib();
 
 describe('Review related tests', () => {
   let token;
@@ -391,9 +393,24 @@ describe('Review related tests', () => {
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.equal(`ValidationError: "action" must be one of [like, unlike]`);
     });
-    it('should not get book successfully, no such review ID', async () => {
+    it('should not get review successfully, no such review ID', async () => {
       const objID = new ObjectID();
       const response = await getRequest(`/reviews/${objID}`, token)
+        .expect(404);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      // eslint-disable-next-line quotes
+      expect(resp_data.error).to.contain(`Review with id: ${objID} does not exist.`);
+    });
+    it('should not get review likes successfully, no such review ID', async () => {
+      const objID = new ObjectID();
+      const response = await getRequest(`/reviews/${objID}/likes`, token)
         .expect(404);
 
       const resp_data = response.body;
@@ -420,6 +437,18 @@ describe('Review related tests', () => {
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.contain(`Review with id: ${objID} does not exist.`);
+    });
+    it('should just throw an error, createReview', async () => {
+      expect(() => createReview().toThrowError());
+    });
+    it('should just throw an error, updateReview', async () => {
+      expect(() => updateReview().toThrowError());
+    });
+    it('should just throw an error, destroyReview', async () => {
+      expect(() => destroyReview().toThrowError());
+    });
+    it('should just throw an error, fetchReviews', async () => {
+      expect(() => fetchReviews().toThrowError());
     });
   });
   // eslint-disable-next-line func-names
