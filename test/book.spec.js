@@ -370,10 +370,9 @@ describe('Book related tests', () => {
       expect(resp_data.success).to.be.an('boolean');
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
-      // eslint-disable-next-line quotes
-      expect(resp_data.error).to.equal(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
+      expect(resp_data.error).to.equal('Book with id: 636cda0b011883107d392958 does not exist on the database');
     });
-    it('should not update book add in stock successfully, no such book ID', async () => {
+    it('should not update book add in stock successfully, incorrect put data', async () => {
       const response = await putRequest('/books/636cda0b011883107d392958/add-instock', token)
         .send({ title: `${Date.now()}_Devworks  Bootcamp` })
         .expect(422);
@@ -385,8 +384,22 @@ describe('Book related tests', () => {
       expect(resp_data.success).to.be.an('boolean');
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
-      // eslint-disable-next-line quotes
-      expect(resp_data.error).to.contain(`ValidationError`);
+      expect(resp_data.error).to.contain('ValidationError');
+      expect(resp_data.error).to.equal('ValidationError: "title" is not allowed');
+    });
+    it('should not update book add in stock successfully, no such book ID', async () => {
+      const response = await putRequest('/books/636cda0b011883107d392958/add-instock', token)
+        .send({ inStock: 2 })
+        .expect(404);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      expect(resp_data.error).to.equal('Book with id: 636cda0b011883107d392958 does not exist on the database');
     });
     it('should not get book successfully, no such book ID', async () => {
       const response = await getRequest('/books/636cda0b011883107d392958', token)

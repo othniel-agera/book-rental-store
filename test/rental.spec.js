@@ -293,6 +293,55 @@ describe('Rental related tests', () => {
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.equal(`Rental with id: ${objID} does not exist on the database`);
     });
+    it('should not be able to checkin a book rental successfully, no such rental ID', async () => {
+      const objID = new ObjectID();
+      const response = await putRequest(`/rentals/${objID}/checkin`, token)
+        .send()
+        .expect(404);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      // eslint-disable-next-line quotes
+      expect(resp_data.error).to.equal(`Rental with id: ${objID} does not exist on the database`);
+    });
+    // eslint-disable-next-line func-names
+    it('should not be able to checkin a book rental successfully, user not authorized cause wrong user', async function () {
+      this.timeout(10000);
+      const dummyUserData = {
+        username: `${Date.now()}_kufre`,
+        firstname: `${Date.now()}_Kufre`,
+        lastname: `${Date.now()}_Okon`,
+        email: `${Date.now()}_book.example@example.com`,
+        password: 'Test1234',
+      };
+      const password = await hashPassword(dummyUserData.password);
+      const dummyUser = await createUser({ ...dummyUserData, password });
+      const rental = await createRental({
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
+        user: dummyUser.id,
+        book: book.id,
+      });
+      // eslint-disable-next-line no-underscore-dangle
+      const response = await putRequest(`/rentals/${rental._id}/checkin`, token)
+        .send()
+        .expect(401);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      // eslint-disable-next-line quotes
+      expect(resp_data.error).to.equal(`User: ${user.id} does not have authorization to checkout this rental`);
+    });
     it('should not get book successfully, no such rental ID', async () => {
       const objID = new ObjectID();
       const response = await getRequest(`/rentals/${objID}`, token)

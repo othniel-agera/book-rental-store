@@ -85,8 +85,8 @@ class BookController {
       page, limit, select, sort, ...filter
     } = query;
     const result = await advancedResults(Book, filter, {
-      page: page || parseInt(page, 10),
-      limit: limit || parseInt(limit, 10),
+      page,
+      limit,
       select,
       sort,
       populate: 'authorInformation',

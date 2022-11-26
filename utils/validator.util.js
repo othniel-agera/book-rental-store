@@ -49,7 +49,6 @@ class Validator {
       description: Joi.string(),
       subject: Joi.string(),
       authorInformation: Joi.string().custom((value, helper) => {
-        console.log(value);
         if (!isValidObjectId(value)) return helper.message('Please enter a valid author ID');
         return value;
       }, 'ObjectID Validation'),
