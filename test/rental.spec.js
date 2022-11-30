@@ -127,7 +127,19 @@ describe('Rental related tests', () => {
       expect(response).to.be.an('array');
     });
     it('should get all the rentals to a books successfully', async () => {
-      const response = await getRequest('/rentals', token)
+      await createRental({
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
+        user: user.id,
+        book: book.id,
+      });
+      await createRental({
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
+        user: user.id,
+        book: book.id,
+      });
+      const response = await getRequest('/rentals?select=dueDate&sort=dueDate&page=2&limit=1', token)
         .expect(200);
 
       const resp_data = response.body;
