@@ -375,13 +375,14 @@ describe('Rental related tests', () => {
       expect(resp_data.error).to.contain(`Rental with id: ${objID} does not exist on the database`);
     });
     it('should just throw an error, createRental', async () => {
-      expect(() => createRental().toThrowError());
+      await expect(createRental(333)).to.eventually.be.rejectedWith('ValidationError: user: Path `user` is required., book: Path `book` is required., dueDate: Path `dueDate` is required.');
     });
     it('should just throw an error, updateRental', async () => {
+      await expect(updateRental(333)).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "rental"');
       expect(() => updateRental().toThrowError());
     });
     it('should just throw an error, destroyRental', async () => {
-      expect(() => destroyRental().toThrowError());
+      await expect(destroyRental({ _id: 333 })).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "rental"');
     });
   });
   // eslint-disable-next-line func-names
