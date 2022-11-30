@@ -1,7 +1,11 @@
 const request = require('supertest');
 const url = require('url');
-const { expect } = require('chai');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const { app } = require('../server');
+
+chai.use(chaiAsPromised);
+const { expect } = chai;
 
 const getRequest = (route, token) => request(app)
   .get(`/api/v1${route}`)

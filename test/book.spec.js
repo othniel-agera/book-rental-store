@@ -434,10 +434,10 @@ describe('Book related tests', () => {
       expect(resp_data.error).to.contain(`Book with id: 636cda0b011883107d392958 does not exist on the database`);
     });
     it('should just throw an error, updateBook', async () => {
-      expect(() => updateBook().toThrowError());
+      await expect(updateBook(333)).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "book"');
     });
     it('should just throw an error, destroyBook', async () => {
-      expect(() => destroyBook().toThrowError());
+      await expect(destroyBook({ _id: 333 })).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "book"');
     });
   });
   // eslint-disable-next-line func-names
