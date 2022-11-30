@@ -379,7 +379,6 @@ describe('Rental related tests', () => {
     });
     it('should just throw an error, updateRental', async () => {
       await expect(updateRental(333)).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "rental"');
-      expect(() => updateRental().toThrowError());
     });
     it('should just throw an error, destroyRental', async () => {
       await expect(destroyRental({ _id: 333 })).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "rental"');

@@ -201,13 +201,13 @@ describe('User Registration Test', () => {
       expect(resp_data.error).to.equal('Incorrect email or password');
     });
     it('should just throw an error, createUser', async () => {
-      expect(() => createUser().toThrowError());
+      await expect(createUser(333)).to.eventually.be.rejectedWith('user validation failed: username: Path `username` is required., firstname: Path `firstname` is required., lastname: Path `lastname` is required., email: Path `email` is required., password: Path `password` is required.');
     });
     it('should just throw an error, updateUser', async () => {
-      expect(() => updateUser().toThrowError());
+      await expect(updateUser(333)).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "user"');
     });
     it('should just throw an error, destroyUser', async () => {
-      expect(() => destroyUser().toThrowError());
+      await expect(destroyUser({ _id: 333 })).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "user"');
     });
     after(async () => {
       const userToDelete = await fetchUser({ username: user.username });

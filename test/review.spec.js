@@ -156,6 +156,11 @@ describe('Review related tests', () => {
       expect(resp_data.data.likes).to.be.an('array');
       expect(resp_data.data.likes).to.not.include(user.id);
     });
+    it('should fetch all the rentals successfully', async () => {
+      const response = await fetchReviews();
+
+      expect(response).to.be.an('array');
+    });
     it('should get all the likes of a book review successfully', async () => {
       const review = await createReview({
         reviewText: `${Date.now()}_Devworks  Bootcamp review`,
@@ -439,16 +444,13 @@ describe('Review related tests', () => {
       expect(resp_data.error).to.contain(`Review with id: ${objID} does not exist.`);
     });
     it('should just throw an error, createReview', async () => {
-      expect(() => createReview().toThrowError());
+      await expect(createReview(333)).to.eventually.be.rejectedWith('ValidationError: reviewText: Path `reviewText` is required., reviewer: Path `reviewer` is required., book: Path `book` is required.');
     });
     it('should just throw an error, updateReview', async () => {
-      expect(() => updateReview().toThrowError());
+      await expect(updateReview(333)).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "review"');
     });
     it('should just throw an error, destroyReview', async () => {
-      expect(() => destroyReview().toThrowError());
-    });
-    it('should just throw an error, fetchReviews', async () => {
-      expect(() => fetchReviews().toThrowError());
+      await expect(destroyReview({ _id: 333 })).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "review"');
     });
   });
   // eslint-disable-next-line func-names
