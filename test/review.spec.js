@@ -199,6 +199,21 @@ describe('Review related tests', () => {
       expect(resp_data.accessToken).to.not.equal(true);
       expect(resp_data.data).to.be.an('array');
     });
+    it('should get all the reviews with book filter successfully', async () => {
+      const response = await getRequest(`/reviews?book=${book.id}`, token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('totalCount');
+      expect(resp_data).to.have.property('countOnPage');
+      expect(resp_data).to.have.property('pagination');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.accessToken).to.not.equal(true);
+      expect(resp_data.data).to.be.an('array');
+    });
     it('should get all the reviews to a book successfully', async () => {
       const response = await getRequest(`/books/${book.id}/reviews`, token)
         .expect(200);
@@ -397,6 +412,21 @@ describe('Review related tests', () => {
       expect(resp_data.error).to.be.an('string');
       // eslint-disable-next-line quotes
       expect(resp_data.error).to.equal(`ValidationError: "action" must be one of [like, unlike]`);
+    });
+    it('should get the review to a book successfully, invalid objectID', async () => {
+      const objID = new ObjectID();
+      const response = await deleteRequest(`/reviews/${objID}?book=wtrkuyjegfsdmh`, token)
+        .expect(404);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('error');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.success).to.equal(false);
+      expect(resp_data.error).to.be.an('string');
+      // eslint-disable-next-line quotes
+      expect(resp_data.error).to.contain(`Review with id: ${objID}`);
     });
     it('should not get review successfully, no such review ID', async () => {
       const objID = new ObjectID();

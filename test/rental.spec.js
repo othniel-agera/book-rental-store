@@ -126,6 +126,32 @@ describe('Rental related tests', () => {
 
       expect(response).to.be.an('array');
     });
+    it('should get all the rentals with boom filter', async () => {
+      await createRental({
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
+        user: user.id,
+        book: book.id,
+      });
+      await createRental({
+        dueDate: new Date('11/30/2022'),
+        quantity: 1,
+        user: user.id,
+        book: book.id,
+      });
+      const response = await getRequest(`/rentals?book=${book.id}`, token)
+        .expect(200);
+
+      const resp_data = response.body;
+      expect(resp_data).to.be.an('object');
+      expect(resp_data).to.have.property('success');
+      expect(resp_data).to.have.property('totalCount');
+      expect(resp_data).to.have.property('countOnPage');
+      expect(resp_data).to.have.property('pagination');
+      expect(resp_data).to.have.property('data');
+      expect(resp_data.success).to.be.an('boolean');
+      expect(resp_data.data).to.be.an('array');
+    });
     it('should get all the rentals to a books successfully', async () => {
       await createRental({
         dueDate: new Date('11/30/2022'),
