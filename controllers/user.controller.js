@@ -54,38 +54,33 @@ class AuthController {
    * @access Public
    */
   login = asyncHandler(async (req, res, next) => {
-    try {
-      const rawData = req.body;
-      const { password } = rawData;
-      const filteredValues = filterValues(rawData, ['email', 'password']);
-      const formattedValues = formatValues(filteredValues);
-      const data = {
-        ...formattedValues,
-        password,
-      };
-      if (!data.email || !password) {
-        return next(
-          new ErrorResponse('Please provide an email and password', 400),
-        );
-      }
-      const user = await this.userLib.fetchUser({
-        email: data.email,
-      });
-      if (!user) {
-        return next(
-          new ErrorResponse('Incorrect email or password', 401),
-        );
-      }
-      const passwordMatch = await comparePasswords(password, user.password);
-      if (passwordMatch) {
-        sendTokenResponse(user, 200, res);
-      }
+    // try {
+    const rawData = req.body;
+    const { password } = rawData;
+    const filteredValues = filterValues(rawData, ['email', 'password']);
+    const formattedValues = formatValues(filteredValues);
+    const data = {
+      ...formattedValues,
+      password,
+    };
+    const user = await this.userLib.fetchUserWithPassword({
+      email: data.email,
+    });
+    if (!user) {
       return next(
         new ErrorResponse('Incorrect email or password', 401),
       );
-    } catch (error) {
-      return res.status(500).send({ error: error.message || error });
     }
+    const passwordMatch = await comparePasswords(password, user.password);
+    if (passwordMatch) {
+      return sendTokenResponse(user, 200, res);
+    }
+    return next(
+      new ErrorResponse('Incorrect email or password', 401),
+    );
+    // } catch (error) {
+    //   return res.status(500).send({ error: error.message || error });
+    // }
   });
 
   /**

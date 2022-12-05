@@ -7,6 +7,7 @@ const BookSchema = new Schema(
     title: {
       type: String,
       required: true,
+      unique: true,
     },
     description: {
       type: String,
@@ -60,5 +61,7 @@ const BookSchema = new Schema(
     timestamps: true,
   },
 );
+
+/* delete all reviews when book is deleted */
 
 module.exports = mongoose.model('book', BookSchema);

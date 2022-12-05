@@ -4,7 +4,9 @@ const {
 const UserLib = require('../lib/user.lib');
 const { hashPassword } = require('../utils/utility.util');
 
-const { createUser, fetchUser, destroyUser } = new UserLib();
+const {
+  createUser, fetchUser, fetchUsers, destroyUser, updateUser,
+} = new UserLib();
 
 describe('User Registration Test', () => {
   describe('Positive Tests', () => {
@@ -28,7 +30,9 @@ describe('User Registration Test', () => {
         .set('Accept', 'application/json');
       token = response.body.accessToken;
     });
-    it('should register user successfully', async () => {
+    // eslint-disable-next-line func-names
+    it('should register user successfully', async function () {
+      this.timeout(10000);
       const response = await request(app)
         .post('/api/v1/auth/signup')
         .send({
@@ -107,6 +111,11 @@ describe('User Registration Test', () => {
       expect(resp_data.data).to.be.an('object');
       expect(resp_data.success).to.equal(true);
     });
+    it('should fetch all the users successfully', async () => {
+      const response = await fetchUsers();
+
+      expect(response).to.be.an('array');
+    });
     // eslint-disable-next-line func-names
     after(async function () {
       this.timeout(10000);
@@ -183,7 +192,6 @@ describe('User Registration Test', () => {
         .expect(401);
 
       const resp_data = response.body;
-      console.log(resp_data);
       expect(resp_data).to.be.an('object');
       expect(resp_data).to.have.property('success');
       expect(resp_data).to.have.property('error');
@@ -191,6 +199,15 @@ describe('User Registration Test', () => {
       expect(resp_data.success).to.equal(false);
       expect(resp_data.error).to.be.an('string');
       expect(resp_data.error).to.equal('Incorrect email or password');
+    });
+    it('should just throw an error, createUser', async () => {
+      await expect(createUser(333)).to.eventually.be.rejectedWith('user validation failed: username: Path `username` is required., firstname: Path `firstname` is required., lastname: Path `lastname` is required., email: Path `email` is required., password: Path `password` is required.');
+    });
+    it('should just throw an error, updateUser', async () => {
+      await expect(updateUser(333)).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "user"');
+    });
+    it('should just throw an error, destroyUser', async () => {
+      await expect(destroyUser({ _id: 333 })).to.eventually.be.rejectedWith('Cast to ObjectId failed for value "333" (type number) at path "_id" for model "user"');
     });
     after(async () => {
       const userToDelete = await fetchUser({ username: user.username });
