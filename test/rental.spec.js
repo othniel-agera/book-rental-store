@@ -133,12 +133,6 @@ describe('Rental related tests', () => {
         user: user.id,
         book: book.id,
       });
-      await createRental({
-        dueDate: new Date('11/30/2022'),
-        quantity: 1,
-        user: user.id,
-        book: book.id,
-      });
       const response = await getRequest(`/rentals?book=${book.id}`, token)
         .expect(200);
 
