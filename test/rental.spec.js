@@ -146,7 +146,9 @@ describe('Rental related tests', () => {
       expect(resp_data.success).to.be.an('boolean');
       expect(resp_data.data).to.be.an('array');
     });
-    it('should get all the rentals to a books successfully', async () => {
+    // eslint-disable-next-line func-names
+    it('should get all the rentals to a books successfully', async function () {
+      this.timeout(10000);
       await createRental({
         dueDate: new Date('11/30/2022'),
         quantity: 1,
